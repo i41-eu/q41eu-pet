@@ -273,7 +273,7 @@ For showing the pet: something always happens within a minute.
 ## Development
 
 - **V1** An offline host simulator for the robot's drawing code
-  ([`firmware/tests`](https://github.com/i41-eu/i41eu-embody/tree/main/firmware/tests)), and screen snapshots from the real robot
+  ([`firmware/tests`](https://github.com/i41-eu/i41eu-StackChan/tree/embody/firmware/tests)), and screen snapshots from the real robot
   (`POST /api/debug/{id}/run`), to check pictures without guessing.
 - **V2** Test on the LAN server, not on the public one.
 - **V3** Before committing: `gofmt -l .`, `go vet ./...`, `go test -race ./...`.

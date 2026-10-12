@@ -12,8 +12,8 @@ It is a separate server that the robot switches to on its app switcher (the QR s
 Next, then Connect), or from its manager's page. It speaks the Embody Mode protocol from
 [q41eu-raw](https://github.com/i41-eu/q41eu-raw) (`wire` package).
 The robot runs Embody Mode from the
-[i41eu-embody firmware](https://github.com/i41-eu/i41eu-embody); setting it up:
-[SETUP.md](https://github.com/i41-eu/i41eu-embody/blob/main/firmware/main/apps/app_embody_mode/SETUP.md).
+[i41eu-StackChan firmware](https://github.com/i41-eu/i41eu-StackChan); setting it up:
+[SETUP.md](https://github.com/i41-eu/i41eu-StackChan/blob/embody/firmware/main/apps/app_embody_mode/SETUP.md).
 It runs at [pet.q41.eu](https://pet.q41.eu): set your robot up on
 [m.i41.eu](https://m.i41.eu) with the pet among its apps, or run the pet on a server at home.
 
@@ -46,7 +46,7 @@ All requirements, with ids and the open decisions, are in
 
 | Piece | What it is | Needed? |
 |---|---|---|
-| **Robot** | a Stackchan with the [Embody Mode firmware](https://github.com/i41-eu/i41eu-embody/tree/main/firmware/main/apps/app_embody_mode). On its screen the **app switcher** (the QR screen: Next, Connect) lists its apps and switches between them; its gear opens the **Manager screen** (which manager it has, turn it off or on). | yes |
+| **Robot** | a Stackchan with the [Embody Mode firmware](https://github.com/i41-eu/i41eu-StackChan/tree/embody/firmware/main/apps/app_embody_mode). On its screen the **app switcher** (the QR screen: Next, Connect) lists its apps and switches between them; its gear opens the **Manager screen** (which manager it has, turn it off or on). | yes |
 | **Apps** | what the robot does, one at a time. Each app is a web service: the robot connects to it, and a phone or browser opens its web page. This repo is [Pet](https://s.i41.eu/pet); the apps online: [s.i41.eu](https://s.i41.eu/#apps) | at least one |
 | **Phone or browser** | opens an app's page and pairs with the robot by scanning its QR code; with end-to-end encryption only paired browsers can read the robot | to use an app |
 | **Manager** | [i41eu-manager](https://github.com/i41-eu/i41eu-manager): the web service that sets robots up over USB, gives each robot its own token per app, and switches and changes apps from its page; on your own computer (the home manager) or online at [m.i41.eu](https://m.i41.eu), which a home manager may link to | optional: without it, apps are written over USB and switched on the robot's app switcher |
@@ -174,7 +174,7 @@ checks with the manager (the package
 `ghcr.io/i41-eu/q41eu-pet:<tag>` (Alpine with ffmpeg and espeak-ng for the voice).
 
 Switching the robot to it:
-[SETUP.md, More servers and apps](https://github.com/i41-eu/i41eu-embody/blob/main/firmware/main/apps/app_embody_mode/SETUP.md#more-servers-and-apps).
+[SETUP.md, More servers and apps](https://github.com/i41-eu/i41eu-StackChan/blob/embody/firmware/main/apps/app_embody_mode/SETUP.md#more-servers-and-apps).
 Then scan the pet's QR code with the kid's phone.
 
 ## Layout
@@ -228,7 +228,7 @@ once, clone it next to this repo and add an uncommitted `go.work`
 
 ## Related projects
 
-- [i41eu-embody](https://github.com/i41-eu/i41eu-embody): the robot's firmware, Embody Mode.
+- [i41eu-StackChan](https://github.com/i41-eu/i41eu-StackChan): the robot's firmware, Embody Mode.
 - [q41eu-raw](https://github.com/i41-eu/q41eu-raw): the `wire` package, and the full dashboard.
 - [q41eu-sbot](https://github.com/i41-eu/q41eu-sbot): another app server on the same protocol (a cockpit for the robot and a TPBot car).
 - [i41eu-arch](https://github.com/i41-eu/i41eu-arch): the platform this is part of. All the repos: [The repos today](https://github.com/i41-eu/i41eu-arch#the-repos-today).
