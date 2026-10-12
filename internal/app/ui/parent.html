@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pet · for parents</title>
+<link rel="icon" href="/chan/happy.svg">
+<style>
+  :root { --bg: #f6f4ef; --card: #fff; --ink: #2d2a26; --muted: #736d64; --line: #e6e0d6; --accent: #376cc5; /* 4.5:1 or more */ --danger: #c62828; --ok: #2e7d32; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #17181b; --card: #222428; --ink: #ecebe8; --muted: #a09c95; --line: #34363b; --accent: #7aa7ff; --danger: #ff6b6b; --ok: #7bd389; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 system-ui, sans-serif; padding: 16px; }
+  main { max-width: 640px; margin: 0 auto; display: grid; gap: 16px; }
+  header { display: flex; align-items: center; gap: 12px; }
+  header { flex-wrap: wrap; }
+  header h1 { font-size: 20px; margin: 0; flex: 1 1 100%; }
+  a { color: var(--accent); }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  section h2 { font-size: 16px; margin: 0 0 12px; }
+  .row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+  .row input[type=text] { flex: 1; }
+  .row input[type=password] { width: 130px; }
+  .row > label:first-child:not(:has(input)) { min-width: 110px; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); gap: 8px 10px; align-items: center; }
+  .grid input { width: 100%; }
+  input, select { max-width: 100%; }
+  section, main > div { min-width: 0; }
+  .grid .h { color: var(--muted); font-size: 14px; }
+  input, select, button { font: inherit; color: inherit; }
+  input[type=text], input[type=time], input[type=number], input[type=password], select {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; min-width: 0; }
+  input[type=number] { width: 90px; }
+  input[type=range] { flex: 1; min-width: 140px; }
+  button { background: var(--bg); border: 1px solid var(--line); border-radius: 9px; padding: 8px 14px; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button.danger { color: var(--danger); border-color: var(--danger); }
+  .hint { color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+  .saved { color: var(--ok); font-weight: 600; opacity: 0; transition: opacity .3s; }
+  .saved.on { opacity: 1; }
+  .err { color: var(--danger); }
+  .lock { text-align: center; }
+  .lock input { font-size: 28px; letter-spacing: 8px; text-align: center; width: 200px; }
+  .stats { display: grid; grid-template-columns: auto 1fr auto; gap: 6px 10px; align-items: center; }
+  .stats img { width: 26px; }
+  .bar { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  td { padding: 6px 4px; border-top: 1px solid var(--line); vertical-align: middle; }
+  td img { width: 22px; vertical-align: middle; }
+  .mono { font-family: ui-monospace, monospace; font-size: 13px; }
+  .log { max-height: 320px; overflow: auto; }
+  .tries { display: flex; flex-wrap: wrap; gap: 8px; }
+  .hidden { display: none !important; }
+  .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0; display: flex; gap: 12px; align-items: center; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 data-t="title"></h1>
+    <a href="/" data-t="toKid"></a>
+    <button id="lockBtn" class="hidden" data-t="lock"></button>
+    <button id="signOutBtn" class="hidden" data-t="signOut"></button>
+    <a id="managerLink" class="hidden" href="#"></a>
+  </header>
+
+  <section id="notPaired" class="hidden"><p data-t="notPaired"></p>
+    <p id="notPairedSignIn" class="hidden"><span data-t="notPairedSignIn"></span> <a href="/auth/login?next=/parent" data-t="signIn"></a></p></section>
+
+  <section id="lock" class="lock hidden">
+    <h2 id="lockTitle"></h2>
+    <div id="signInBox" class="hidden">
+      <p id="signInText"></p>
+      <p><a id="signInBtn" href="/auth/login?next=/parent" data-t="signIn"></a></p>
+    </div>
+    <form id="pinForm">
+      <input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" pattern="[0-9]*">
+      <p><label><input id="remember" type="checkbox"> <span data-t="parentDevice"></span></label></p>
+      <p><button class="primary" data-t="unlock"></button></p>
+      <p id="pinErr" class="err"></p>
+      <p class="hint" id="pinHint"></p>
+    </form>
+  </section>
+
+  <div id="panel" class="hidden" style="display:grid;gap:16px">
+    <section>
+      <h2 data-t="today"></h2>
+      <div class="stats">
+        <img src="/emoji/apple.svg" alt=""><div class="bar"><i id="sFood"></i></div><span id="nFood"></span>
+        <img src="/emoji/heart.svg" alt=""><div class="bar"><i id="sFun"></i></div><span id="nFun"></span>
+        <img src="/emoji/zzz.svg" alt=""><div class="bar"><i id="sEnergy"></i></div><span id="nEnergy"></span>
+      </div>
+      <p class="hint" id="todayText"></p>
+      <h2 style="margin-top:14px" data-t="setNeeds"></h2>
+      <div class="stats">
+        <img src="/emoji/apple.svg" alt=""><input id="eFood" type="range" min="0" max="100"><span id="vFood"></span>
+        <img src="/emoji/heart.svg" alt=""><input id="eFun" type="range" min="0" max="100"><span id="vFun"></span>
+        <img src="/emoji/zzz.svg" alt=""><input id="eEnergy" type="range" min="0" max="100"><span id="vEnergy"></span>
+      </div>
+      <div class="row"><button id="setNeeds" data-t="set"></button><button id="fullNeeds" data-t="allFull"></button><span id="needsSaved" class="saved" data-t="saved"></span></div>
+    </section>
+
+    <section>
+      <h2 data-t="pet"></h2>
+      <div class="row"><label for="name" data-t="name"></label><input id="name" type="text" maxlength="24"></div>
+      <div class="row"><label for="lang" data-t="lang"></label>
+        <select id="lang"><option value="cs">Čeština</option><option value="en">English</option></select></div>
+      <div class="row"><label for="difficulty" data-t="difficulty"></label>
+        <select id="difficulty"><option value="easy" data-t="easy"></option><option value="normal" data-t="normal"></option><option value="hard" data-t="hard"></option></select></div>
+      <p class="hint" data-t="difficultyHint"></p>
+    </section>
+
+    <section>
+      <h2 data-t="schedule"></h2>
+      <div class="grid">
+        <span></span><span class="h" data-t="wake"></span><span class="h" data-t="bed"></span>
+        <span data-t="weekday"></span><input id="wdWake" type="time"><input id="wdBed" type="time">
+        <span data-t="weekend"></span><input id="weWake" type="time"><input id="weBed" type="time">
+      </div>
+      <p class="hint" data-t="scheduleHint"></p>
+      <div class="row"><label><input id="school" type="checkbox"> <span data-t="school"></span></label></div>
+      <div class="row"><input id="schoolFrom" type="time"> – <input id="schoolTo" type="time"></div>
+      <p class="hint" data-t="schoolHint"></p>
+      <div class="row"><label for="nightWake" data-t="nightWake"></label><input id="nightWake" type="number" min="0" max="60"></div>
+      <p class="hint" data-t="nightWakeHint"></p>
+    </section>
+
+    <section>
+      <h2 data-t="limits"></h2>
+      <div class="row"><label for="playLimit" data-t="playLimit"></label><input id="playLimit" type="number" min="0" max="600" step="5"></div>
+      <p class="hint" data-t="minutes"></p>
+      <p class="hint" data-t="playLimitHint"></p>
+    </section>
+
+    <section>
+      <h2 data-t="game"></h2>
+      <div class="row"><label for="ballSeconds" data-t="ballSeconds"></label><input id="ballSeconds" type="number" min="3" max="10"></div>
+      <div class="row"><label><input id="headMoves" type="checkbox"> <span data-t="headMoves"></span></label></div>
+      <p class="hint" data-t="gameHint"></p>
+      <h2 style="margin-top:14px" data-t="colorsTitle"></h2>
+      <div class="row"><label><input id="colorPhotos" type="checkbox"> <span data-t="colorPhotos"></span></label></div>
+      <p class="hint" data-t="colorPhotosHint"></p>
+      <table id="top"></table>
+      <div class="row"><button class="danger" id="topClear" data-t="topClear"></button></div>
+    </section>
+
+    <section>
+      <h2 data-t="robot"></h2>
+      <div class="row"><label><input id="sounds" type="checkbox"> <span data-t="sounds"></span></label></div>
+      <div class="row"><label><input id="voice" type="checkbox"> <span data-t="voice"></span></label></div>
+      <div class="row"><label for="volume" data-t="volume"></label><input id="volume" type="range" min="0" max="100"><span id="volumeN" style="min-width:2.5em"></span></div>
+      <div class="row"><label><input id="nightLight" type="checkbox"> <span data-t="nightLight"></span></label></div>
+      <div class="row"><label><input id="screenOff" type="checkbox"> <span data-t="screenOff"></span></label></div>
+      <div class="row"><label for="screenIdle" data-t="screenIdle"></label><input id="screenIdle" type="number" min="0" max="120"></div>
+      <div class="row"><label><input id="drawnFace" type="checkbox"> <span data-t="drawnFace"></span></label></div>
+      <p class="hint" data-t="drawnFaceHint"></p>
+    </section>
+
+    <section>
+      <h2 data-t="cards"></h2>
+      <p class="hint" data-t="cardsHint"></p>
+      <table id="cards"></table>
+    </section>
+
+    <div class="save-bar">
+      <button class="primary" id="save" data-t="save"></button>
+      <span class="saved" id="saved" data-t="saved"></span>
+      <span class="err" id="saveErr"></span>
+    </div>
+
+    <section>
+      <h2 data-t="try"></h2>
+      <div class="tries" id="tries"></div>
+      <p class="hint" data-t="tryHint"></p>
+    </section>
+
+    <section>
+      <h2 data-t="log"></h2>
+      <div class="log"><table id="log"></table></div>
+    </section>
+
+    <section>
+      <h2 data-t="advanced"></h2>
+      <div id="pinRows">
+      <div class="row"><label for="newPin" data-t="newPin"></label>
+        <input id="newPin" type="password" inputmode="numeric" maxlength="8" pattern="[0-9]*"><button id="pinSave" data-t="change"></button><span id="pinSaved" class="saved" data-t="saved"></span></div>
+      <div class="row"><label><input id="parentDeviceOn" type="checkbox"> <span data-t="parentDevice"></span></label></div>
+      <p class="hint" data-t="parentDeviceHint"></p>
+      </div>
+      <div class="row"><button class="danger" id="reset" data-t="reset"></button></div>
+      <p class="hint" data-t="resetHint"></p>
+    </section>
+
+    <section>
+      <h2 data-t="demoTitle"></h2>
+      <div class="row"><label><input id="demo" type="checkbox"> <span data-t="demo"></span></label><span id="demoSaved" class="saved" data-t="saved"></span></div>
+      <p class="hint" data-t="demoHint"></p>
+      <div class="row"><label><input id="demoNoSchool" type="checkbox"> <span data-t="demoNoSchool"></span></label></div>
+    </section>
+  </div>
+  <p class="hint" style="text-align:center">Stack-chan is developed and published by meganetaaan ·
+    <a href="https://github.com/meganetaaan/stack-chan">github.com/meganetaaan/stack-chan</a> · pictures: Fluent Emoji (MIT). Stack-chan is a registered trademark of Shinya Ishikawa; this project is independent of it.</p>
+</main>
+
+<script>
+const T = {
+  cs: {
+    title: "Nastavení pro rodiče", toKid: "Zpět k mazlíčkovi", lock: "Zamknout",
+    signIn: "Přihlásit se", signOut: "Odhlásit", ownerOnly: "Jen pro majitele robota",
+    manager: h => `Robot a aplikace (${h})`,
+    signInHint: "Přihlas se účtem, kterým byl robot nastavený.",
+    notOwner: n => `Jsi přihlášen(a) jako ${n}, ale robot patří jinému účtu.`,
+    notPairedSignIn: "Majitel robota se může rovnou přihlásit:",
+    parentDevice: "Toto je zařízení rodiče (zůstane odemčené)",
+    parentDeviceHint: "Na tomto zařízení se stránka pro rodiče nezamyká, dokud nestiskneš Zamknout. Nezaškrtávej na zařízení, které používá dítě.",
+    notPaired: "Nejdřív naskenuj QR kód na robotovi, pak otevři tuto stránku znovu.",
+    setPin: "Zvol PIN (4–8 číslic)", enterPin: "Zadej PIN", unlock: "Odemknout",
+    setPinHint: "Tímto PINem se bude stránka pro rodiče odemykat. Dítě ho nemá znát.",
+    wrong_pin: "Špatný PIN.", wait: "Příliš mnoho pokusů, zkus to za minutu.", pin_format: "PIN má 4 až 8 číslic.",
+    today: "Dnes", pet: "Mazlíček", name: "Jméno", lang: "Jazyk", difficulty: "Náročnost",
+    easy: "Snadná", normal: "Běžná", hard: "Těžká",
+    difficultyHint: "Jak rychle dostává hlad a nudí se. Mazlíček nikdy neumře ani neonemocní – jen je smutný.",
+    schedule: "Denní režim", wake: "Vstává", bed: "Jde spát", weekday: "Po–Pá", weekend: "So–Ne",
+    scheduleHint: "V noci mazlíček spí: jeho potřeby stojí, obrazovka zhasne a na dotyk jen ospale odpoví. 10 minut před spaním zívá.",
+    voice: "Mluví (hlas robota)",
+    head: (p, y) => `Hlava: sklon ${p}°, otočení ${y}°.`,
+    demoTitle: "Ukázkový režim (demo)", demo: "Zapnout",
+    demoNoSchool: "Ignorovat školu (mazlíček během ní neodpočívá)",
+    demoHint: "Když je jídlo, zábava nebo energie na 90 %, spadne zpátky na 10 %: mazlíček pořád něco potřebuje. Na robotovi se ukáže obrázek s šipkami a věta.",
+    setNeeds: "Změnit potřeby", set: "Nastavit", allFull: "Vše plné",
+    game: "Hra (chytání míčku)", ballSeconds: "Sekund na míček", headMoves: "Hlava se při hře hýbe (krouží, uhýbá ruce)",
+    gameHint: "Pro menší děti: víc sekund a hlava v klidu.",
+    colorsTitle: "Hra s barvami – žebříček", colorPhotos: "Fotit hráče na prvních třech místech",
+    colorPhotosHint: "Robot hráče vyfotí svou kamerou. Fotky zůstávají jen na tomto serveru a ukazují se na robotovi a na stránkách mazlíčka.",
+    topClear: "Smazat žebříček", topClearConfirm: "Smazat celý žebříček i s fotkami?",
+    drawnFace: "Kreslený obličej na robotovi", drawnFaceHint: "Místo robotova vlastního (mrkajícího) obličeje ukazuje barevné obrázky podle nálady.",
+    nightWake: "Vzbudit v noci",
+    nightWakeHint: "Minuty, 0 = nejde. V noci dotyk hlavy jedním prstem ukáže sen; celá dlaň na hlavě mazlíčka na chvíli potichu vzbudí, pak zase usne.",
+    school: "Škola / školka (Po–Pá)", schoolHint: "Během školy potřeby stojí, aby mazlíček netrpěl, když dítě není doma.",
+    limits: "Omezení", playLimit: "Hraní denně", minutes: "Minut za den, 0 = bez omezení.",
+    playLimitHint: "Po vyčerpání je mazlíček unavený a chce si odpočinout do zítřka. Krmit jde vždy.",
+    robot: "Robot", sounds: "Zvuky", volume: "Hlasitost", nightLight: "Noční světýlko (tlumené LED)", screenOff: "V noci vypnout obrazovku", screenIdle: "Přes den vypnout obrazovku, když si nikdo nehraje (minuty, 0 = nikdy)",
+    cards: "Kartičky s jídlem (NFC)", cardsHint: "Přilož kartičku k robotovi – objeví se tady a můžeš jí vybrat jídlo. Neznámá kartička dá jablko.",
+    noCards: "Zatím žádné kartičky.", unknown: "nová", remove: "Odebrat",
+    save: "Uložit", saved: "Uloženo ✓",
+    try: "Vyzkoušet", tryHint: "Ukáže to na robotovi hned, bez čekání na večer.",
+    morning: "Ráno", night: "Dobrou noc", needs: "Potřeby na displeji", sound: "Zvuk",
+    log: "Co se dělo", advanced: "Další", newPin: "Nový PIN", change: "Změnit",
+    reset: "Nový mazlíček", resetConfirm: "Opravdu začít s novým mazlíčkem? Potřeby a věk se vynulují, nastavení zůstane.",
+    resetHint: "Začne znovu od nuly, nastavení zůstane.",
+    todayText: (m, left, mood, phase) => `Hraní dnes: ${m} min${left >= 0 ? `, zbývá ${left} min` : ""}. Nálada: ${mood}. ${phase}`,
+    moods: { happy: "šťastný", ok: "v pohodě", hungry: "hladový", bored: "nudí se", tired: "unavený", napping: "dřímá", sleeping: "spí" },
+    phases: { awake: "", night: "Je noc.", school: "Je škola – potřeby stojí." },
+    kinds: { dream_food: "Sen o jídle", picky: "Chtěl něco jiného", demo_reset: "Ukázkový režim: zpátky na 10 %", colors: "Hra s barvami", parent_stats: "Rodič změnil potřeby", night_wake: "Vzbuzen v noci", feed: "Jídlo", full: "Nechtěl jíst (plný)", cuddle: "Pohlazení", play: "Hraní", nap: "Zdřímnutí", morning: "Ráno – vstal", night: "Večer – usnul", reset: "Nový mazlíček" },
+    foods: { apple: "jablko", carrot: "mrkev", banana: "banán", bread: "chleba", milk: "mléko", cake: "dort", food: "jídlo", fun: "zábava", energy: "energie" },
+    offline: "Robot není připojený.",
+  },
+  en: {
+    title: "Parent settings", toKid: "Back to the pet", lock: "Lock",
+    signIn: "Sign in", signOut: "Sign out", ownerOnly: "For the robot's owner",
+    manager: h => `Robot and apps (${h})`,
+    signInHint: "Sign in with the account that set the robot up.",
+    notOwner: n => `Signed in as ${n}, but the robot belongs to another account.`,
+    notPairedSignIn: "The robot's owner can sign in instead:",
+    parentDevice: "This is a parent's device (stays unlocked)",
+    parentDeviceHint: "On this device the parent page stays unlocked until you press Lock. Don't tick it on a device the kid uses.",
+    notPaired: "Scan the QR code on the robot first, then open this page again.",
+    setPin: "Choose a PIN (4–8 digits)", enterPin: "Enter the PIN", unlock: "Unlock",
+    setPinHint: "This PIN unlocks the parent page. Keep it from the kid.",
+    wrong_pin: "Wrong PIN.", wait: "Too many tries, wait a minute.", pin_format: "The PIN has 4 to 8 digits.",
+    today: "Today", pet: "Pet", name: "Name", lang: "Language", difficulty: "Difficulty",
+    easy: "Easy", normal: "Normal", hard: "Hard",
+    difficultyHint: "How fast it gets hungry and bored. The pet never dies or gets ill – it only gets sad.",
+    schedule: "Daily routine", wake: "Wakes up", bed: "Bedtime", weekday: "Mon–Fri", weekend: "Sat–Sun",
+    scheduleHint: "At night the pet sleeps: its needs pause, the screen goes dark and a touch only gets a sleepy answer. It yawns 10 minutes before bedtime.",
+    voice: "Speaks (robot voice)",
+    head: (p, y) => `Head: tilt ${p}°, turn ${y}°.`,
+    demoTitle: "Demo mode", demo: "On",
+    demoNoSchool: "Ignore school hours (the pet does not rest then)",
+    demoHint: "When food, fun or energy reaches 90%, it drops back to 10%: the pet always needs something. The robot shows a reset picture and says so.",
+    setNeeds: "Change the needs", set: "Set", allFull: "All full",
+    game: "Game (catch the ball)", ballSeconds: "Seconds per ball", headMoves: "The head moves in the game (circles, dodges a hand)",
+    gameHint: "For small kids: more seconds and a still head.",
+    colorsTitle: "Color game – leaderboard", colorPhotos: "Take a photo of the top three players",
+    colorPhotosHint: "The robot takes the photo with its camera. Photos stay on this server only and show on the robot and the pet's pages.",
+    topClear: "Clear the leaderboard", topClearConfirm: "Clear the whole leaderboard, photos too?",
+    drawnFace: "Drawn face on the robot", drawnFaceHint: "Colourful pictures per mood instead of the robot's own (blinking) face.",
+    nightWake: "Wake at night",
+    nightWakeHint: "Minutes, 0 = never. At night a one-finger touch on the head shows a dream; the whole palm on the head wakes the pet quietly for a while, then it falls asleep again.",
+    school: "School / kindergarten (Mon–Fri)", schoolHint: "During school the needs pause, so the pet does not suffer while the kid is away.",
+    limits: "Limits", playLimit: "Play per day", minutes: "Minutes per day, 0 = no limit.",
+    playLimitHint: "When it is used up, the pet is tired and rests until tomorrow. Feeding always works.",
+    robot: "Robot", sounds: "Sounds", volume: "Volume", nightLight: "Night light (dim LEDs)", screenOff: "Screen off at night", screenIdle: "By day, screen off when nobody plays (minutes, 0 = never)",
+    cards: "Food cards (NFC)", cardsHint: "Hold a card to the robot – it shows up here and you can pick its food. An unknown card feeds an apple.",
+    noCards: "No cards yet.", unknown: "new", remove: "Remove",
+    save: "Save", saved: "Saved ✓",
+    try: "Try it", tryHint: "Shows it on the robot now, without waiting for the evening.",
+    morning: "Morning", night: "Good night", needs: "Needs on the screen", sound: "Sound",
+    log: "What happened", advanced: "More", newPin: "New PIN", change: "Change",
+    reset: "New pet", resetConfirm: "Really start with a new pet? Needs and age reset, the settings stay.",
+    resetHint: "Starts again from zero; the settings stay.",
+    todayText: (m, left, mood, phase) => `Played today: ${m} min${left >= 0 ? `, ${left} min left` : ""}. Mood: ${mood}. ${phase}`,
+    moods: { happy: "happy", ok: "fine", hungry: "hungry", bored: "bored", tired: "tired", napping: "napping", sleeping: "asleep" },
+    phases: { awake: "", night: "It is night.", school: "School time – needs paused." },
+    kinds: { dream_food: "Dreamt of food", picky: "Wanted something else", demo_reset: "Demo mode: back to 10%", colors: "Color game", parent_stats: "Parent changed the needs", night_wake: "Woken at night", feed: "Food", full: "Refused food (full)", cuddle: "Cuddle", play: "Play", nap: "Nap", morning: "Morning – woke up", night: "Evening – fell asleep", reset: "New pet" },
+    foods: { apple: "apple", carrot: "carrot", banana: "banana", bread: "bread", milk: "milk", cake: "cake", food: "food", fun: "fun", energy: "energy" },
+    offline: "The robot is not connected.",
+  },
+};
+const kindIcon = { colors: "party", dream_food: "zzz", picky: "grumpy", demo_reset: "refresh", parent_stats: "gear", night_wake: "moon", feed: "plate", full: "grumpy", cuddle: "hug", play: "ball", nap: "zzz", morning: "sun", night: "moon", reset: "party" };
+const SOUNDS = ["chirp", "munch", "tada", "no", "yawn", "morning", "lullaby", "hello", "whee"];
+const FOODS = ["apple", "carrot", "banana", "bread", "milk", "cake"];
+const $ = id => document.getElementById(id);
+// The page's language: the one a parent picked (kept in this browser), else the browser's (Czech
+// for Czech and Slovak, else English); the pet's own language (what the robot says) is a setting.
+const browserLang = () => /^(cs|sk)\b/i.test(navigator.language || "") ? "cs" : "en";
+const pickedLang = () => { try { return localStorage.getItem("petLang"); } catch (e) { return null; } };
+let lang = pickedLang() || browserLang(), data = null, cardFoods = {};
+
+const t = k => T[lang][k] ?? T.cs[k] ?? k;
+function texts() {
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
+  document.documentElement.lang = lang;
+  document.title = lang === "cs" ? "Mazlíček · pro rodiče" : "Pet · for parents";
+}
+const show = (id, on) => $(id).classList.toggle("hidden", !on);
+// A language picked here is the page's from now on, in this browser (and the kid page's).
+$("lang").addEventListener("change", () => {
+  lang = $("lang").value; texts();
+  try { localStorage.setItem("petLang", lang); } catch (e) {}
+});
+
+async function api(path, body) {
+  const res = await fetch(path, body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  let out = {};
+  try { out = await res.json(); } catch (e) {}
+  return { ok: res.ok, status: res.status, out };
+}
+
+async function load() {
+  const { status, out } = await api("/api/parent");
+  texts();
+  const signIn = !!out.sign_in;
+  show("signOutBtn", signIn && out.signed_in);
+  if (out.manager_url) {
+    $("managerLink").href = out.manager_url;
+    $("managerLink").textContent = t("manager")(new URL(out.manager_url).host);
+  }
+  show("managerLink", !!out.manager_url);
+  show("notPaired", status === 404);
+  show("notPairedSignIn", status === 404 && signIn && !out.signed_in);
+  if (status === 404) { show("lock", false); show("panel", false); return; }
+  data = out;
+  show("lockBtn", out.unlocked && !signIn);
+  show("pinRows", !signIn);
+  show("lock", !out.unlocked);
+  show("panel", out.unlocked);
+  show("pinForm", !signIn);
+  show("signInBox", signIn);
+  if (!out.unlocked && signIn) {
+    $("lockTitle").textContent = t("ownerOnly");
+    $("signInText").textContent = out.signed_in ? t("notOwner")(out.name || "?") : t("signInHint");
+    show("signInBtn", !out.signed_in);
+    return;
+  }
+  if (!out.unlocked) {
+    $("lockTitle").textContent = out.has_pin ? t("enterPin") : t("setPin");
+    $("pinHint").textContent = out.has_pin ? "" : t("setPinHint");
+    $("pin").focus();
+    return;
+  }
+  fill(out);
+}
+
+function fill(d) {
+  const s = d.settings, st = d.state;
+  $("name").value = s.name; $("lang").value = s.lang; $("difficulty").value = s.difficulty;
+  $("wdWake").value = s.weekday.wake; $("wdBed").value = s.weekday.bed;
+  $("weWake").value = s.weekend.wake; $("weBed").value = s.weekend.bed;
+  $("nightWake").value = s.night_wake_min;
+  $("ballSeconds").value = s.game_ball_seconds; $("headMoves").checked = s.game_head_moves;
+  $("colorPhotos").checked = s.color_photos;
+  renderTop(st.top || []);
+  $("drawnFace").checked = s.drawn_face;
+  $("voice").checked = s.voice;
+  $("demo").checked = s.demo;
+  $("demoNoSchool").checked = s.demo_no_school;
+  $("parentDeviceOn").checked = d.parent_device;
+  for (const [k, id] of [["food", "Food"], ["fun", "Fun"], ["energy", "Energy"]]) {
+    $("e" + id).value = Math.round(st.stats[k]); $("v" + id).textContent = Math.round(st.stats[k]);
+  }
+  $("school").checked = s.school; $("schoolFrom").value = s.school_from; $("schoolTo").value = s.school_to;
+  $("playLimit").value = s.play_limit_min;
+  $("sounds").checked = s.sounds; $("volume").value = s.volume; $("volumeN").textContent = s.volume;
+  $("nightLight").checked = s.night_light; $("screenOff").checked = s.screen_off_at_night; $("screenIdle").value = s.screen_idle_min;
+  cardFoods = { ...s.foods };
+  for (const tag of d.unknown_tags || []) if (!(tag.uid in cardFoods)) cardFoods[tag.uid] = "";
+  renderCards(d.unknown_tags);
+  renderToday(d);
+  renderLog(d.log);
+  renderTries();
+}
+
+function renderToday(d) {
+  const st = d.state;
+  for (const [k, id] of [["food", "Food"], ["fun", "Fun"], ["energy", "Energy"]]) {
+    $("s" + id).style.width = st.stats[k] + "%"; $("n" + id).textContent = Math.round(st.stats[k]);
+  }
+  const left = st.play_left < 0 ? -1 : Math.round(st.play_left);
+  $("todayText").textContent = t("todayText")(Math.round(d.played_today), left, T[lang].moods[st.mood] || st.mood, T[lang].phases[st.phase] || "")
+    + (st.online ? "" : " " + t("offline"))
+    + (d.head ? " " + t("head")(Math.round(d.head.pitch), Math.round(d.head.yaw)) : "");
+}
+
+function renderCards(unknown) {
+  const tbl = $("cards");
+  tbl.innerHTML = "";
+  const seen = Object.fromEntries(unknown.map(u => [u.uid, u.seen]));
+  const uids = Object.keys(cardFoods);
+  if (!uids.length) { tbl.innerHTML = `<tr><td class="hint">${t("noCards")}</td></tr>`; return; }
+  for (const uid of uids) {
+    const tr = document.createElement("tr");
+    const sel = document.createElement("select");
+    sel.innerHTML = `<option value="">–</option>` + FOODS.map(f => `<option value="${f}">${T[lang].foods[f]}</option>`).join("");
+    sel.value = cardFoods[uid];
+    const img = document.createElement("img");
+    const setImg = () => { img.src = cardFoods[uid] ? `/emoji/${cardFoods[uid]}.svg` : "/emoji/apple.svg"; img.style.opacity = cardFoods[uid] ? 1 : .3; };
+    sel.onchange = () => { cardFoods[uid] = sel.value; setImg(); };
+    setImg();
+    const rm = document.createElement("button");
+    rm.textContent = t("remove");
+    rm.onclick = () => { delete cardFoods[uid]; tr.remove(); };
+    const c1 = document.createElement("td"); c1.appendChild(img);
+    const c2 = document.createElement("td"); c2.className = "mono"; c2.textContent = uid + (seen[uid] && !data.settings.foods[uid] ? ` (${t("unknown")})` : "");
+    const c3 = document.createElement("td"); c3.appendChild(sel);
+    const c4 = document.createElement("td"); c4.appendChild(rm);
+    tr.append(c1, c2, c3, c4);
+    tbl.appendChild(tr);
+  }
+}
+
+function renderLog(log) {
+  const tbl = $("log");
+  tbl.innerHTML = "";
+  const fmt = new Intl.DateTimeFormat(lang, { weekday: "short", hour: "2-digit", minute: "2-digit" });
+  for (const e of log || []) {
+    const tr = document.createElement("tr");
+    const detail = e.detail ? ` – ${T[lang].foods[e.detail] || e.detail}` : "";
+    tr.innerHTML = `<td>${fmt.format(new Date(e.at))}</td><td><img src="/emoji/${kindIcon[e.kind] || "neutral"}.svg" alt=""></td><td></td>`;
+    tr.lastChild.textContent = (T[lang].kinds[e.kind] || e.kind) + detail;
+    tbl.appendChild(tr);
+  }
+}
+
+function renderTries() {
+  const box = $("tries");
+  if (box.children.length) return;
+  const add = (label, what) => { const b = document.createElement("button"); b.textContent = label; b.onclick = () => api("/api/parent/try", { what }); box.appendChild(b); };
+  add(t("morning"), "morning"); add(t("night"), "night"); add(t("needs"), "needs"); add(t("voice"), "voice");
+  for (const s of SOUNDS) add(`${t("sound")}: ${s}`, "sound:" + s);
+}
+
+// renderTop lists the color game's leaderboard, each place with a remove button.
+function renderTop(top) {
+  const tb = $("top");
+  tb.textContent = "";
+  top.forEach((e, i) => {
+    const tr = tb.insertRow();
+    tr.insertCell().textContent = `${i + 1}.`;
+    const ph = tr.insertCell();
+    if (e.photo) { const img = document.createElement("img"); img.src = e.photo; img.style.width = "64px"; img.style.borderRadius = "6px"; ph.appendChild(img); }
+    tr.insertCell().textContent = `${e.seconds} s · ${e.at}`;
+    const b = document.createElement("button");
+    b.textContent = t("remove");
+    b.onclick = async () => { const { ok } = await api("/api/parent/top", { remove: i }); if (ok) load(); };
+    tr.insertCell().appendChild(b);
+  });
+  show("topClear", top.length > 0);
+}
+$("topClear").onclick = async () => { if (confirm(t("topClearConfirm"))) { const { ok } = await api("/api/parent/top", { clear: true }); if (ok) load(); } };
+
+function collect() {
+  const foods = {};
+  for (const [uid, f] of Object.entries(cardFoods)) if (f) foods[uid] = f;
+  return {
+    name: $("name").value, lang: $("lang").value, difficulty: $("difficulty").value,
+    weekday: { wake: $("wdWake").value, bed: $("wdBed").value },
+    weekend: { wake: $("weWake").value, bed: $("weBed").value },
+    school: $("school").checked, school_from: $("schoolFrom").value, school_to: $("schoolTo").value,
+    play_limit_min: +$("playLimit").value || 0,
+    night_wake_min: +$("nightWake").value || 0,
+    game_ball_seconds: +$("ballSeconds").value || 5, game_head_moves: $("headMoves").checked,
+    color_photos: $("colorPhotos").checked,
+    drawn_face: $("drawnFace").checked,
+    voice: $("voice").checked,
+    demo: $("demo").checked,
+    demo_no_school: $("demoNoSchool").checked,
+    sounds: $("sounds").checked, volume: +$("volume").value,
+    night_light: $("nightLight").checked, screen_off_at_night: $("screenOff").checked, screen_idle_min: +$("screenIdle").value || 0,
+    foods,
+  };
+}
+
+function flash(id) { const el = $(id); el.classList.add("on"); setTimeout(() => el.classList.remove("on"), 1800); }
+
+$("pinForm").onsubmit = async e => {
+  e.preventDefault();
+  const { ok, out } = await api("/api/parent/unlock", { pin: $("pin").value, remember: $("remember").checked });
+  $("pin").value = "";
+  $("pinErr").textContent = ok ? "" : t(out.error || "wrong_pin");
+  if (ok) load();
+};
+$("lockBtn").onclick = async () => { await api("/api/parent/lock", {}); load(); };
+$("signOutBtn").onclick = async () => { await api("/auth/logout", {}); load(); };
+$("parentDeviceOn").onchange = async () => { await api("/api/parent/device", { parent: $("parentDeviceOn").checked }); load(); };
+for (const id of ["Food", "Fun", "Energy"]) $("e" + id).oninput = () => $("v" + id).textContent = $("e" + id).value;
+const setNeeds = async (v) => {
+  const { ok } = await api("/api/parent/stats", v || { food: +$("eFood").value, fun: +$("eFun").value, energy: +$("eEnergy").value });
+  if (ok) { flash("needsSaved"); load(); }
+};
+$("setNeeds").onclick = () => setNeeds();
+$("fullNeeds").onclick = () => setNeeds({ food: 100, fun: 100, energy: 100 });
+$("volume").oninput = () => $("volumeN").textContent = $("volume").value;
+// The demo section is below the save bar: its checkboxes save at once (only them).
+const saveDemo = async () => {
+  const s = { ...data.settings, demo: $("demo").checked, demo_no_school: $("demoNoSchool").checked };
+  const { ok } = await api("/api/parent/settings", s);
+  if (ok) { data.settings = s; flash("demoSaved"); }
+};
+$("demo").onchange = $("demoNoSchool").onchange = saveDemo;
+$("save").onclick = async () => {
+  const { ok, status } = await api("/api/parent/settings", collect());
+  $("saveErr").textContent = ok ? "" : status === 403 ? t("enterPin") : "!";
+  if (ok) { flash("saved"); const was = lang; await load(); if (was !== lang) texts(); }
+  else if (status === 403) load();
+};
+$("pinSave").onclick = async () => {
+  const { ok, out } = await api("/api/parent/pin", { pin: $("newPin").value });
+  $("newPin").value = "";
+  if (ok) flash("pinSaved"); else alert(t(out.error || "pin_format"));
+};
+$("reset").onclick = async () => { if (confirm(t("resetConfirm"))) { await api("/api/parent/reset", {}); load(); } };
+
+texts();
+load();
+// Live needs: the same event stream as the kid's page (every 2 s and on changes).
+let events = null;
+function liveState() {
+  if (events || !data?.unlocked) return;
+  events = new EventSource("/api/events");
+  events.addEventListener("state", (e) => {
+    if (!data?.unlocked) return;
+    data.state = JSON.parse(e.data);
+    renderToday(data);
+  });
+}
+setInterval(liveState, 1000);
+
+setInterval(async () => { // keep "today" and the log fresh while the page is open
+  if (!data?.unlocked) return;
+  const { status, out } = await api("/api/parent");
+  if (status === 200 && out.unlocked) { data = out; renderToday(out); renderLog(out.log); }
+  else if (status === 200) load();
+}, 30000);
+</script>
+</body>
+</html>

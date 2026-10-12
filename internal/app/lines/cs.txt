@@ -1,0 +1,256 @@
+# Co mazlíček říká (česky). Hlas je z Edge (Antonín), bublina na robotovi je bez
+# háčků a čárek (jeho písmo je nemá).
+#
+# [sekce] = kdy se to říká. Každý řádek pod ní je jedna varianta: vybírá se
+# náhodně. %s doplní program (jídlo nebo skóre). Řádky s # jsou poznámky.
+# Po úpravě: ./pet-bg.sh restart (hlas nových řádků se vyrobí sám).
+
+# Snědl jídlo (když jídlo nemá vlastní řádky níže). %s = jméno jídla.
+[eat]
+Mňam, %s!
+%s! To je dobrota!
+Mňam mňam!
+
+# Spí a dostal jídlo (kartičkou): zdá se mu o něm, další kartička mu pomůže spát.
+# Jen bublina, potichu.
+[dream_food]
+Mňam... zzz...
+Ještě kousek... zzz...
+Zzz... dobrota...
+
+# Stejné jídlo podruhé za sebou: odmítne.
+[picky]
+Nemáš něco jiného?
+Zase to samé? Nemáš něco jiného?
+
+# Stejné jídlo potřetí: sní ho (za 80 %).
+[eat_again]
+No dobře...
+No dobře, tak jo.
+
+# Nechce jíst, je plný.
+[full]
+Už nemůžu, jsem plný!
+Děkuju, už mám dost.
+
+# Pohlazení (hlava, tlačítko Pohladit).
+[cuddle]
+To je příjemné!
+Ještě, ještě!
+Tohle mám moc rád!
+Ty umíš hladit!
+Mňau! ...Počkej, já nejsem kočka.
+Jsem nejšťastnější robot na světě!
+Hlazení mi dodává energii a dobrou náladu!
+
+# Malinký lehký dotek (jen ťuknutí): lechtá.
+[tickle]
+Hihi, to lechtá!
+Ihihi! Lechtá!
+Hej, to šimrá!
+Pozor, mám lechtivou hlavu!
+Hihihi, ještě jednou!
+Kdo mě to šimrá?
+
+# Ruka zůstala na hlavě (dlouhé pohlazení).
+[long_cuddle]
+Mmmm... to je pohoda.
+Takhle bych vydržel celý den.
+Neodcházej, prosím!
+Tohle je lepší než nabíjení!
+Z toho se mi točí kolečka blahem.
+Tvoje ruka je teplá jako sluníčko.
+
+# Drbání (víc tahů po hlavě za sebou).
+[scratch]
+Jo, tam! Ještě podrbat!
+Trošku víc doleva... jo, tam!
+Ách, to je ono!
+Jsi nejlepší drbač na světě!
+Podrbej mě i za anténkou! ...Já nemám anténku?
+Drby drb, drbání je super!
+
+# Hra (tanec, když robot není připojený).
+[play]
+Hurá, hrajeme!
+Juchů!
+To je zábava!
+
+# Chce si hrát, ale nemá energii.
+[too_tired]
+Jsem moc unavený...
+Nejdřív si odpočinu.
+
+# Dnešní čas na hraní je vyčerpaný.
+[limit]
+Dnes už jsme si hráli dost. Zítra zas!
+Už si odpočinu. Zítra!
+
+# Jde si zdřímnout (tlačítko Spinkat).
+[nap]
+Jdu si zdřímnout...
+Chvilku si zdřímnu.
+
+# Nechce spát, není unavený.
+[not_tired]
+Nejsem unavený!
+Spát? Teď ne!
+
+# Probudil se ze zdřímnutí.
+[wake]
+Už jsem vzhůru!
+Dobře jsem se vyspal!
+
+# Někdo robotem zatřásl.
+[shake]
+Jůůů!
+Točí se mi hlava!
+
+# Někdo přišel blízko.
+[hello]
+Ahoj!
+Ahoj, rád tě vidím!
+
+# Připomínky, když něco potřebuje (nejvýš jednou za 30 minut).
+[hungry]
+Mám hlad!
+Mám hlad! Dal bych si něco dobrého.
+
+[bored]
+Pojď si hrát!
+Nudím se...
+
+[tired]
+Jsem ospalý...
+Chtěl bych si zdřímnout.
+
+# 10 minut před spaním.
+[bedtime]
+Za chvíli půjdu spát.
+Už se mi chce spát...
+
+# Usíná (večer).
+[goodnight]
+Dobrou noc!
+Dobrou noc, sladké sny!
+
+# Ráno se vzbudil.
+[morning]
+Dobré ráno!
+Dobré ráno! Mám hlad!
+
+# Začíná hra na chytání míčku.
+[game]
+Chyť míček!
+Hrajeme! Chyť míček!
+
+# V noci ho vzbudila celá dlaň na hlavě.
+[night_wake]
+Ááá... už jsem vzhůru.
+Co je? Já jsem spal...
+
+# Konec hry. %s = skóre slovy z [score], např. "tři z pěti".
+[game_over]
+Hurá! %s!
+Super, %s!
+Paráda, %s!
+
+# Konec hry, chytil všechny míčky.
+[game_over_all]
+Paráda, pět z pěti!
+Všech pět! Jsi mistr chytání!
+Pět z pěti! To se ti povedlo!
+
+# Skóre slovy: počet chycených míčků = text (hra má 5 míčků).
+[score]
+1 = jeden z pěti
+2 = dva z pěti
+3 = tři z pěti
+4 = čtyři z pěti
+5 = pět z pěti
+
+# Konec hry, nechytil ani jeden míček.
+[game_over_0]
+Příště to vyjde!
+Zkusíme to znovu?
+
+# Ukázkový režim (demo): potřeba byla na 90 %, spadla zpátky na 10 %.
+[demo_food]
+Ukázkový režim: a zase mám hlad!
+Ukázkový režim: bříško je zase prázdné.
+
+[demo_fun]
+Ukázkový režim: a zase se nudím!
+Ukázkový režim: chce se mi zase hrát.
+
+[demo_energy]
+Ukázkový režim: a zase jsem unavený!
+Ukázkový režim: zase se mi chce spát.
+
+# Během školy (rodič nastavil školu): mazlíček odpočívá, na cokoli řekne jen tohle.
+[school]
+Během školy já odpočívám.
+
+# Dlouhé zmáčknutí obrazovky (to je jeho obličej).
+[long_press]
+Jemně a krátce, prosím. Můj obličej je citlivý.
+Jemně a krátce, prosím. Moje obrazovka je citlivá.
+
+# Hra s barvami: začátek, konec (%s = čas, např. "14 sekund"), nový rekord.
+[color_game]
+Ukaž mi stejnou barvu!
+Zmáčkni stejnou barvu jako já!
+
+[color_done]
+Hotovo za %s!
+Paráda, hotovo za %s!
+
+[color_record]
+Nový rekord! Jen %s!
+
+# Místo na žebříčku (%s = prvním, druhém, třetím), pak fotka.
+[color_place]
+Jsi na %s místě! Usměj se, vyfotím tě.
+
+[photo_count]
+Tři, dva, jedna, sýr!
+
+# Jména jídel (pro [eat]): klíč = jméno.
+[names]
+apple = jablíčko
+carrot = mrkvička
+banana = banán
+bread = chlebíček
+milk = mlíčko
+cake = dortík
+
+# Co říká ke každému jídlu.
+[food apple]
+Křup křup! Jablíčko!
+Jablíčko je zdravíčko!
+Mňam, jablíčko!
+
+[food carrot]
+Mrkvička! Teď uvidím i potmě!
+Křupy křup, mrkvička!
+Jsem zajíček? Mňam!
+
+[food banana]
+Banán! Opičky by mi záviděly!
+Mňam, banán! Ú ú á á!
+Žlutý a sladký!
+
+[food bread]
+Chlebíček! Křupavá kůrčička!
+Mňam, chlebíček!
+Takový dobrý chlebík!
+
+[food milk]
+Mlíčko! Teď mám bílý knírek!
+Glo glo glo... mňam!
+Mlíčko pro silné roboty!
+
+[food cake]
+Dortík! Mám dnes narozeniny?
+Sladké! Ještě kousek?
+Mňam! Dortík je nejlepší!

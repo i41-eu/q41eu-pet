@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#bfe6ff">
+<title>Pet</title>
+<link rel="icon" href="/chan/happy.svg">
+<style>
+  :root {
+    --sky: #bfe6ff; --ground: #fff7e6; --ink: #3b2f2a; --muted: #8a7b70;
+    --card: #ffffffcc; --track: #e8dfcc; --green: #4caf50; --yellow: #f5b700; --red: #e53935;
+    --feed: #ffd8a8; --cuddle: #ffc9de; --play: #c3f0c8; --nap: #d7ccff;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Nunito", "Segoe UI Rounded", system-ui, sans-serif; color: var(--ink);
+    background: linear-gradient(180deg, var(--sky), var(--ground) 70%);
+    display: flex; flex-direction: column; align-items: center;
+    padding: max(12px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    user-select: none; overflow-x: hidden; transition: background .8s;
+  }
+  body.night { --ink: #e8ecff; --muted: #9aa3c7; --card: #ffffff14; --track: #ffffff22;
+    background: radial-gradient(ellipse at 70% 10%, #2b3a78, #0e1433 70%); }
+  main { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+  img { display: block; pointer-events: none; }
+
+  header { display: flex; align-items: center; gap: 10px; }
+  header h1 { margin: 0; font-size: clamp(26px, 8vw, 38px); font-weight: 900; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .age { font-size: 15px; color: var(--muted); font-weight: 700; }
+  .gear { width: 34px; height: 34px; opacity: .45; }
+  .offline { font-size: 13px; color: var(--muted); font-weight: 700; display: none; }
+  .offline.on { display: block; }
+
+  .stage { position: relative; display: grid; place-items: center; min-height: 30vh; cursor: pointer; }
+  .face { width: min(46vw, 30vh, 220px); transition: transform .3s; animation: bob 3s ease-in-out infinite; }
+  .face.shake { animation: shake .5s; }
+  .face.jump { animation: jump .6s; }
+  body.night .face, .napping .face { animation: breathe 4s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-8px); } }
+  @keyframes breathe { 50% { transform: scale(1.04); } }
+  @keyframes shake { 20%,60% { transform: translateX(-14px) rotate(-6deg); } 40%,80% { transform: translateX(14px) rotate(6deg); } }
+  @keyframes jump { 40% { transform: translateY(-40px) scale(1.08); } }
+  .bubble { position: absolute; right: 4%; top: 2%; width: 96px; height: 96px; border-radius: 50%;
+    background: #fff; display: none; place-items: center; box-shadow: 0 6px 18px #0002; animation: pop .4s; }
+  .bubble::after { content: ""; position: absolute; left: 4px; bottom: -8px; width: 22px; height: 22px; border-radius: 50%; background: #fff; }
+  .bubble.on { display: grid; }
+  .bubble img { width: 62px; }
+  @keyframes pop { from { transform: scale(0); } }
+  .zzz { position: absolute; right: 12%; top: 6%; width: 64px; display: none; animation: float 3s ease-in-out infinite; }
+  .napping .zzz, body.night .zzz { display: block; }
+  @keyframes float { 50% { transform: translateY(-14px); opacity: .6; } }
+  .fx { position: absolute; width: 90px; left: 50%; top: 50%; margin: -45px; animation: fly 1.6s ease-out forwards; }
+  @keyframes fly { 0% { transform: translate(0, 60px) scale(.3); opacity: 0; } 25% { opacity: 1; transform: translate(0, 0) scale(1.1); }
+    100% { transform: translate(var(--dx, 0), -150px) scale(.8); opacity: 0; } }
+
+  .needs { background: var(--card); border-radius: 24px; padding: 12px 16px; display: grid; gap: 10px; }
+  .need { display: flex; align-items: center; gap: 12px; }
+  .need img { width: 40px; }
+  .bar { flex: 1; height: 22px; border-radius: 11px; background: var(--track); overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 11px; min-width: 22px; transition: width .6s, background .6s; }
+
+  .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .btn { border: 0; border-radius: 28px; padding: 14px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font: inherit; font-size: 17px; font-weight: 800; color: #3b2f2a; box-shadow: 0 6px 0 #0000001a; cursor: pointer; position: relative; }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #0000001a; }
+  .btn img { width: min(20vw, 10vh, 84px); }
+  .btn.feed { background: var(--feed); } .btn.cuddle { background: var(--cuddle); }
+  .btn.play { background: var(--play); } .btn.nap { background: var(--nap); }
+  .btn.tired { filter: grayscale(.8); opacity: .6; }
+  .btn .badge { position: absolute; right: 10px; top: 8px; width: 34px; display: none; }
+  .btn.tired .badge { display: block; }
+
+  .nightcard { display: none; text-align: center; background: var(--card); border-radius: 24px; padding: 18px; font-size: 22px; font-weight: 800; }
+  .nightcard .wake { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; font-size: 30px; }
+  .nightcard img { width: 56px; }
+  body.night .nightcard { display: block; }
+  body.night .buttons, body.night .needs { display: none; }
+
+  .overlay { position: fixed; inset: 0; background: #0006; display: none; place-items: center; padding: 16px; z-index: 5; }
+  .overlay.on { display: grid; }
+  .sheet { background: var(--ground); border-radius: 32px; padding: 18px; width: 100%; max-width: 460px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; animation: pop .25s; }
+  .food { border: 0; background: #fff; border-radius: 22px; padding: 10px; box-shadow: 0 5px 0 #0000001a; cursor: pointer; }
+  .food:active { transform: translateY(3px); }
+  .food img { width: 100%; }
+
+  .gamecard { display: none; text-align: center; background: var(--card); border-radius: 24px; padding: 16px; font-size: 22px; font-weight: 800; }
+  .gamecard .ball { width: 96px; margin: 0 auto 8px; animation: bounce .8s ease-in-out infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0) rotate(0); } to { transform: translateY(-24px) rotate(40deg); } }
+  .gamecard .stars { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+  .gamecard .stars img { width: 44px; filter: grayscale(1); opacity: .3; transition: all .3s; }
+  .gamecard .stars img.on { filter: none; opacity: 1; transform: scale(1.15); }
+  body.gaming .gamecard { display: block; }
+  /* The color game's leaderboard: a podium, first in the middle. */
+  .board { display: none; background: var(--card); border-radius: 24px; padding: 14px 10px 0; }
+  body.hasboard:not(.gaming):not(.night) .board { display: block; }
+  .board .podium { display: flex; justify-content: center; align-items: flex-end; gap: 8px; }
+  .board .place { flex: 1; max-width: 120px; text-align: center; font-weight: 800; font-size: 18px; }
+  .board .photo { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; border: 4px solid var(--medal); background: #26326e; display: block; }
+  .board .step { background: var(--medal); border-radius: 10px 10px 0 0; margin-top: 6px; font-size: 26px; color: #0e1433; padding-top: 6px; }
+  .board .p1 { --medal: #ffc107; } .board .p1 .step { height: 70px; }
+  .board .p2 { --medal: #cfd8dc; } .board .p2 .step { height: 48px; }
+  .board .p3 { --medal: #d7894a; } .board .p3 .step { height: 34px; }
+  body.gaming .buttons { display: none; }
+
+  .pair { display: none; text-align: center; margin: auto; max-width: 420px; font-size: 22px; font-weight: 800; }
+  .pair img { width: 160px; margin: 0 auto 16px; }
+  .pair p { font-size: 17px; font-weight: 600; color: var(--muted); }
+  .credit { font-size: 12px; color: var(--muted); text-align: center; margin-top: 24px; }
+  .credit a { color: inherit; }
+  body.unpaired main > :not(.pair) { display: none; }
+  body.unpaired .pair { display: block; }
+</style>
+</head>
+<body class="unpaired">
+<main>
+  <header>
+    <h1 id="name">…</h1>
+    <span class="age" id="age"></span>
+    <a href="/parent" aria-label="Parent settings"><img class="gear" src="/emoji/gear.svg" alt=""></a>
+  </header>
+  <div class="offline" id="offline"></div>
+
+  <div class="stage" id="stage">
+    <img class="face" id="face" src="/chan/happy.svg" alt="">
+    <div class="bubble" id="bubble"><img id="bubbleImg" src="/emoji/apple.svg" alt=""></div>
+    <img class="zzz" src="/emoji/zzz.svg" alt="">
+  </div>
+
+  <section class="needs" aria-label="needs">
+    <div class="need"><img src="/emoji/apple.svg" alt=""><div class="bar" role="progressbar" aria-label="Food" data-label="food" aria-valuemin="0" aria-valuemax="100"><i id="barFood"></i></div></div>
+    <div class="need"><img src="/emoji/heart.svg" alt=""><div class="bar" role="progressbar" aria-label="Fun" data-label="fun" aria-valuemin="0" aria-valuemax="100"><i id="barFun"></i></div></div>
+    <div class="need"><img src="/emoji/zzz.svg" alt=""><div class="bar" role="progressbar" aria-label="Energy" data-label="energy" aria-valuemin="0" aria-valuemax="100"><i id="barEnergy"></i></div></div>
+  </section>
+
+  <section class="buttons">
+    <button class="btn feed" id="btnFeed"><img src="/emoji/plate.svg" alt=""><span data-t="feed"></span></button>
+    <button class="btn cuddle" id="btnCuddle"><img src="/emoji/hug.svg" alt=""><img class="badge" src="/emoji/zzz.svg" alt=""><span data-t="cuddle"></span></button>
+    <button class="btn play" id="btnPlay"><img src="/emoji/ball.svg" alt=""><img class="badge" src="/emoji/zzz.svg" alt=""><span data-t="play"></span></button>
+    <button class="btn nap" id="btnNap"><img id="napImg" src="/emoji/moon.svg" alt=""><span id="napLabel" data-t="nap"></span></button>
+  </section>
+
+  <section class="gamecard">
+    <img class="ball" src="/emoji/ball.svg" alt="">
+    <div data-t="catch"></div>
+    <div class="stars" id="stars"></div>
+  </section>
+
+  <section class="board" aria-label="leaderboard">
+    <div class="podium" id="podium"></div>
+  </section>
+
+  <section class="nightcard">
+    <div id="nightText"></div>
+    <div class="wake"><img src="/emoji/sun.svg" alt=""><span id="wakeAt"></span></div>
+  </section>
+
+  <section class="pair">
+    <img src="/chan/happy.svg" alt="">
+    <div data-t="scan"></div>
+    <p data-t="scanHow"></p>
+    <p data-t="what"></p>
+    <p class="links"><a href="https://s.i41.eu/pet" data-t="more"></a> · <a href="/parent" data-t="parents"></a></p>
+    <p class="credit">Stack-chan is developed and published by meganetaaan · <a href="https://github.com/meganetaaan/stack-chan">github.com/meganetaaan/stack-chan</a>. Stack-chan is a registered trademark of Shinya Ishikawa; this project is independent of it.</p>
+  </section>
+</main>
+
+<div class="overlay" id="foods"><div class="sheet" id="foodSheet"></div></div>
+
+<script>
+const T = {
+  cs: {
+    catch: "Chyť míček na robotovi!",
+    feed: "Jídlo", cuddle: "Pohladit", play: "Hrát", nap: "Spinkat", wake: "Vzbudit",
+    scan: "Naskenuj QR kód na robotovi", scanHow: "Na robotovi přejeď zespodu nahoru a klepni na QR.",
+    what: "Mazlíček, který žije na robotovi: nakrm ho, pohlaď ho, hraj si s ním, ulož ho spát.",
+    more: "Víc o mazlíčkovi", parents: "Rodiče: přihlásit se",
+    offline: "Robot teď není připojený.", sleeps: n => `Psst… ${n} spí.`,
+    age: d => d === 0 ? "dnes narozen" : d === 1 ? "1 den" : d < 5 ? `${d} dny` : `${d} dní`,
+  },
+  en: {
+    catch: "Catch the ball on the robot!",
+    feed: "Food", cuddle: "Cuddle", play: "Play", nap: "Nap", wake: "Wake up",
+    scan: "Scan the QR code on the robot", scanHow: "On the robot, swipe up from the bottom and tap QR.",
+    what: "A pet that lives on the robot: feed it, cuddle it, play with it, put it to bed.",
+    more: "More about the pet", parents: "Parents: sign in",
+    offline: "The robot is not connected right now.", sleeps: n => `Shh… ${n} is sleeping.`,
+    age: d => d === 0 ? "born today" : d === 1 ? "1 day old" : `${d} days old`,
+  },
+};
+// The pet is a tiny Stackchan (ui/chan): the same face as on the robot's screen.
+const moodFace = { happy: "happy", ok: "neutral", hungry: "sad", bored: "grumpy", tired: "yawn", napping: "sleeping", sleeping: "sleeping" };
+const moodNeed = { hungry: "apple", bored: "ball", tired: "zzz" };
+const $ = id => document.getElementById(id);
+// The page's language: the one a parent picked on /parent (kept in this browser), else the
+// browser's (Czech for Czech and Slovak, else English).
+const browserLang = () => /^(cs|sk)\b/i.test(navigator.language || "") ? "cs" : "en";
+const pickedLang = () => { try { return localStorage.getItem("petLang"); } catch (e) { return null; } };
+let state = null, lang = pickedLang() || browserLang();
+
+function t(key, ...args) { const v = (T[lang] || T.cs)[key]; return typeof v === "function" ? v(...args) : v; }
+function texts() {
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
+  document.documentElement.lang = lang;
+  document.title = lang === "cs" ? "Mazlíček" : "Pet";
+}
+
+function barColor(v) { return v < 30 ? "var(--red)" : v < 60 ? "var(--yellow)" : "var(--green)"; }
+function setBar(el, v) {
+  v = Math.round(Math.max(0, Math.min(100, v)));
+  el.style.width = v + "%"; el.style.background = barColor(v);
+  el.parentElement.setAttribute("aria-valuenow", v); // read out by screen readers
+}
+
+function render(s) {
+  state = s;
+  lang = s.lang || lang;
+  document.body.classList.remove("unpaired");
+  document.body.classList.toggle("night", s.phase === "night");
+  document.body.classList.toggle("gaming", !!s.game);
+  if (s.game) stars(s.game);
+  board(s.top || []);
+  $("stage").classList.toggle("napping", s.mood === "napping");
+  const napping = s.mood === "napping";
+  $("napLabel").dataset.t = napping ? "wake" : "nap";
+  texts();
+  $("name").textContent = s.name;
+  $("age").textContent = t("age", s.age_days);
+  const off = $("offline"); off.textContent = t("offline"); off.classList.toggle("on", !s.online);
+  $("face").src = `/chan/${moodFace[s.mood] || "neutral"}.svg`;
+  const need = moodNeed[s.mood];
+  $("bubble").classList.toggle("on", !!need);
+  if (need) $("bubbleImg").src = `/emoji/${need}.svg`;
+  setBar($("barFood"), s.stats.food); setBar($("barFun"), s.stats.fun); setBar($("barEnergy"), s.stats.energy);
+  const limited = s.play_left === 0;
+  $("btnPlay").classList.toggle("tired", limited || s.stats.energy < 15);
+  $("btnCuddle").classList.toggle("tired", limited);
+  $("napImg").src = napping ? "/emoji/sun.svg" : "/emoji/moon.svg";
+  $("nightText").textContent = t("sleeps", s.name);
+  $("wakeAt").textContent = s.wake;
+  document.querySelector('meta[name="theme-color"]').content = s.phase === "night" ? "#0e1433" : "#bfe6ff";
+}
+
+// board shows the color game's top three as a podium (second, first, third).
+function board(top) {
+  document.body.classList.toggle("hasboard", top.length > 0);
+  const el = $("podium");
+  el.textContent = "";
+  for (const i of [1, 0, 2]) {
+    const e = top[i];
+    const div = document.createElement("div");
+    div.className = `place p${i + 1}`;
+    if (e) {
+      const img = document.createElement("img");
+      img.className = "photo";
+      img.src = e.photo || "/emoji/star.svg";
+      img.alt = "";
+      if (!e.photo) img.style.objectFit = "contain";
+      div.appendChild(img);
+      const t = document.createElement("div");
+      t.textContent = `${e.seconds} s`;
+      div.appendChild(t);
+    }
+    const step = document.createElement("div");
+    step.className = "step";
+    step.textContent = i + 1;
+    div.appendChild(step);
+    el.appendChild(div);
+  }
+}
+
+// stars shows the game's progress: one star per ball, lit when caught.
+function stars(g) {
+  const box = $("stars");
+  while (box.children.length < g.rounds) { const i = document.createElement("img"); i.src = "/emoji/star.svg"; i.alt = ""; box.appendChild(i); }
+  [...box.children].forEach((img, i) => img.classList.toggle("on", i < g.hits));
+}
+
+// fx floats a picture up from the pet (hearts, food, zzz...).
+function fx(src, n = 1) {
+  for (let i = 0; i < n; i++) {
+    const img = document.createElement("img");
+    img.className = "fx"; img.src = src;
+    img.style.setProperty("--dx", `${(i - (n - 1) / 2) * 70}px`);
+    img.style.animationDelay = `${i * 120}ms`;
+    $("stage").appendChild(img);
+    setTimeout(() => img.remove(), 1800 + i * 120);
+  }
+}
+function faceAnim(cls, face, ms = 1600) {
+  const f = $("face");
+  f.classList.remove("shake", "jump"); void f.offsetWidth; f.classList.add(cls);
+  if (face) { f.src = `/chan/${face}.svg`; setTimeout(() => state && render(state), ms); }
+}
+// react shows a reaction, from this page or from the robot (head stroke, food card).
+function react(r) {
+  switch (r.kind) {
+    case "eat": case "eat_again": fx(`/emoji/${r.food}.svg`); faceAnim("jump", "yum"); break;
+    case "picky": faceAnim("shake", "grumpy"); break;
+    case "dream_food": fx(`/emoji/${r.food}.svg`); fx("/emoji/zzz.svg"); break;
+    case "full": case "not_tired": faceAnim("shake", "grumpy"); break;
+    case "cuddle": if (r.changed) { fx("/emoji/heart.svg", 3); faceAnim("jump", "happy"); } break;
+    case "play": fx("/emoji/party.svg", 2); fx("/emoji/ball.svg"); faceAnim("jump", "happy"); break;
+    case "too_tired": case "limit": faceAnim("shake", "yawn"); fx("/emoji/zzz.svg"); break;
+    case "nap": fx("/emoji/zzz.svg"); break;
+    case "wake": faceAnim("jump", "happy"); fx("/emoji/sun.svg"); break;
+    case "shake": faceAnim("shake"); break;
+    case "asleep": fx("/emoji/moon.svg"); fx("/emoji/star.svg", 2); break; // a dream on the robot
+    case "night_wake": faceAnim("jump", "yawn"); break;
+    case "school": fx("/emoji/zzz.svg"); faceAnim("shake", "sleeping"); break; // it rests during school
+    case "demo_reset": fx("/emoji/refresh.svg"); fx(`/emoji/${{ food: "apple", fun: "heart", energy: "zzz" }[r.need] || "apple"}.svg`); faceAnim("shake", "sad"); break;
+    case "game_over": if (r.hits) fx("/emoji/star.svg", r.hits); faceAnim("jump", "happy"); break;
+    case "colors_over": fx(r.record ? "/emoji/party.svg" : "/emoji/star.svg", r.record ? 3 : Math.max(1, r.hits)); faceAnim("jump", "happy"); break;
+  }
+}
+
+async function act(action, extra = {}) {
+  try {
+    const res = await fetch("/api/action", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, ...extra }) });
+    if (res.ok) render((await res.json()).state);
+  } catch (e) { /* offline: the event stream reconnects */ }
+}
+
+$("btnFeed").onclick = () => $("foods").classList.add("on");
+$("foods").onclick = e => { if (e.target === $("foods")) $("foods").classList.remove("on"); };
+$("btnCuddle").onclick = () => act("cuddle");
+$("btnPlay").onclick = () => act("play");
+$("btnNap").onclick = () => act(state?.mood === "napping" ? "wake" : "nap");
+$("stage").onclick = () => act("needs"); // tap the pet: its needs on the robot's screen
+
+function foods(list) {
+  const sheet = $("foodSheet");
+  if (sheet.children.length) return;
+  for (const f of list) {
+    const b = document.createElement("button");
+    b.className = "food"; b.innerHTML = `<img src="/emoji/${f}.svg" alt="${f}">`;
+    b.onclick = () => { $("foods").classList.remove("on"); act("feed", { food: f }); };
+    sheet.appendChild(b);
+  }
+}
+
+async function start() {
+  texts();
+  const res = await fetch("/api/state").catch(() => null);
+  if (!res || !res.ok) { document.body.classList.add("unpaired"); setTimeout(start, 5000); return; }
+  const s = await res.json();
+  foods(s.foods); render(s);
+  const es = new EventSource("/api/events");
+  es.addEventListener("state", e => render(JSON.parse(e.data)));
+  es.addEventListener("reaction", e => react(JSON.parse(e.data)));
+}
+start();
+</script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+# What the pet says (English). The voice is Edge's Ana.
+#
+# [section] = when it is said. Each line below is one variant, picked at random.
+# %s is filled in (a food or the score). Lines starting with # are comments.
+# After editing: ./pet-bg.sh restart (the voice of new lines is made by itself).
+# The sections are the same as in cs.txt, which describes each one.
+
+[eat]
+Yum, %s!
+%s! Delicious!
+Nom nom!
+
+[dream_food]
+Yum... zzz...
+One more bite... zzz...
+Zzz... yummy...
+
+[picky]
+Don't you have something else?
+The same again? Something else, please?
+
+[eat_again]
+Oh well...
+Okay, fine.
+
+[full]
+I'm full!
+Thanks, that's enough.
+
+[cuddle]
+That's nice!
+More, more!
+I really love this!
+You're great at cuddles!
+Meow! ...Wait, I'm not a cat.
+I'm the happiest robot in the world!
+Cuddles give me energy and a good mood!
+
+[tickle]
+Hehe, that tickles!
+Hihihi! Tickly!
+Hey, that tickles!
+Careful, my head is ticklish!
+Hehehe, again!
+Who's tickling me?
+
+[long_cuddle]
+Mmmm... this is nice.
+I could stay like this all day.
+Don't go, please!
+This is better than charging!
+My gears are spinning with joy.
+Your hand is warm like the sun.
+
+[scratch]
+Yes, right there! More scratching!
+A bit more to the left... yes, there!
+Ahh, that's the spot!
+You're the best scratcher in the world!
+Scratch behind my antenna too! ...I don't have one?
+Scritch scratch, scratching is great!
+
+[play]
+Yay, let's play!
+Wheee!
+So much fun!
+
+[too_tired]
+I'm too tired...
+I need a rest first.
+
+[limit]
+Enough play for today. Tomorrow!
+Time to rest. Tomorrow!
+
+[nap]
+Time for a nap...
+Just a little nap.
+
+[not_tired]
+I'm not tired!
+Sleep? Not now!
+
+[wake]
+I'm awake!
+What a nice nap!
+
+[shake]
+Wheee!
+I'm dizzy!
+
+[hello]
+Hi!
+Hi, nice to see you!
+
+[hungry]
+I'm hungry!
+Something yummy, please?
+
+[bored]
+Let's play!
+I'm bored...
+
+[tired]
+I'm sleepy...
+I'd like a nap.
+
+[bedtime]
+Bedtime soon.
+I'm getting sleepy...
+
+[goodnight]
+Good night!
+Good night, sweet dreams!
+
+[morning]
+Good morning!
+Good morning! I'm hungry!
+
+[game]
+Catch the ball!
+Let's play catch!
+
+[night_wake]
+Yaaawn... I'm awake.
+What is it? I was sleeping...
+
+[game_over]
+Yay! %s!
+Great, %s!
+Awesome, %s!
+
+[game_over_all]
+Awesome, five out of five!
+All five! You're a catching champion!
+Five out of five! Well done!
+
+[score]
+1 = one out of five
+2 = two out of five
+3 = three out of five
+4 = four out of five
+5 = five out of five
+
+[game_over_0]
+Next time!
+Let's try again?
+
+[demo_food]
+Demo mode: and I'm hungry again!
+Demo mode: my tummy is empty again.
+
+[demo_fun]
+Demo mode: and I'm bored again!
+Demo mode: I want to play again.
+
+[demo_energy]
+Demo mode: and I'm tired again!
+Demo mode: I'm sleepy again.
+
+[school]
+During school I rest.
+
+[long_press]
+Gently and briefly, please. My face is sensitive.
+Gently and briefly, please. My screen is sensitive.
+
+[color_game]
+Show me the same color!
+Press the same color as me!
+
+[color_done]
+Done in %s!
+Great, done in %s!
+
+[color_record]
+A new record! Only %s!
+
+[color_place]
+You are in %s place! Smile, I'll take your photo.
+
+[photo_count]
+Three, two, one, cheese!
+
+[names]
+apple = apple
+carrot = carrot
+banana = banana
+bread = bread
+milk = milk
+cake = cake
+
+[food apple]
+Crunch crunch! Apple!
+An apple a day!
+Yum, apple!
+
+[food carrot]
+Carrot! Now I can see in the dark!
+Crunchy carrot!
+Am I a bunny? Yum!
+
+[food banana]
+Banana! The monkeys are jealous!
+Yum, banana! Ooh-ooh-aah!
+Yellow and sweet!
+
+[food bread]
+Bread! Crunchy crust!
+Yum, bread!
+Such good bread!
+
+[food milk]
+Milk! Now I have a white moustache!
+Glug glug glug... yum!
+Milk for strong robots!
+
+[food cake]
+Cake! Is it my birthday?
+Sweet! One more piece?
+Yum! Cake is the best!
