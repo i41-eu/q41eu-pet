@@ -233,7 +233,7 @@ once, clone it next to this repo and add an uncommitted `go.work`
 - [q41eu-sbot](https://github.com/i41-eu/q41eu-sbot): another app server on the same protocol (a cockpit for the robot and a TPBot car).
 - [i41eu-arch](https://github.com/i41-eu/i41eu-arch): the platform this is part of. All the repos: [The repos today](https://github.com/i41-eu/i41eu-arch#the-repos-today).
 
-Stack-chan (スタックチャン) is a registered trademark of Shinya Ishikawa; this project is independent and only made to work with [Stack-chan](https://github.com/stack-chan/stack-chan) robots.
+Stack-chan (スタックチャン) was created by Shinya Ishikawa and the Stack-chan community ([github.com/stack-chan/stack-chan](https://github.com/stack-chan/stack-chan)); this project is independent of it and of M5Stack.
 
 ## License
 
