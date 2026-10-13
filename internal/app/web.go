@@ -342,11 +342,6 @@ func (a *App) parentRobot(w http.ResponseWriter, r *http.Request, sid string) *r
 	return rb
 }
 
-type tagView struct {
-	UID  string    `json:"uid"`
-	Seen time.Time `json:"seen"`
-}
-
 // handleParent: whether a PIN is set and the page is unlocked; everything else once unlocked.
 func (a *App) handleParent(w http.ResponseWriter, r *http.Request) {
 	sid := a.sessionID(w, r)
@@ -378,16 +373,13 @@ func (a *App) handleParent(w http.ResponseWriter, r *http.Request) {
 		if len(log) > 100 {
 			log = log[:100]
 		}
-		tags := []tagView{}
-		for uid, seen := range rb.unknownTags {
-			tags = append(tags, tagView{uid, seen})
-		}
-		slices.SortFunc(tags, func(x, y tagView) int { return y.Seen.Compare(x.Seen) })
 		out["settings"] = p.Settings
 		out["state"] = a.view(rb)
 		out["played_today"] = p.PlayedToday(now)
 		out["log"] = log
-		out["unknown_tags"] = tags
+		out["cards"] = a.cardViews(rb, now)
+		out["card_recent_s"] = cardRecent.Seconds()
+		out["now"] = now // the page counts "3 min ago" from the server's clock, not the phone's
 		out["born"] = p.Born
 		out["unlocked_until"] = s.parentUntil
 		if rb.head != nil {

@@ -368,9 +368,9 @@ func TestFoodCardsAndParent(t *testing.T) {
 		t.Fatalf("set PIN: %d", code)
 	}
 	code, out := parent.get("/api/parent")
-	tags := out["unknown_tags"].([]any)
-	if code != 200 || len(tags) != 1 || tags[0].(map[string]any)["uid"] != "04A1B2C3" {
-		t.Fatalf("unknown tags: %d %v", code, out["unknown_tags"])
+	cards := out["cards"].([]any)
+	if code != 200 || len(cards) != 1 || cards[0].(map[string]any)["uid"] != "04A1B2C3" || cards[0].(map[string]any)["food"] != "" {
+		t.Fatalf("unknown card: %d %v", code, out["cards"])
 	}
 	log := out["log"].([]any)
 	if len(log) == 0 || log[0].(map[string]any)["detail"] != "apple" {
@@ -386,7 +386,8 @@ func TestFoodCardsAndParent(t *testing.T) {
 		t.Fatalf("save settings: %d", code)
 	}
 	_, out = parent.get("/api/parent")
-	if len(out["unknown_tags"].([]any)) != 0 || out["settings"].(map[string]any)["lang"] != "en" {
+	cards = out["cards"].([]any)
+	if len(cards) != 1 || cards[0].(map[string]any)["food"] != "milk" || out["settings"].(map[string]any)["lang"] != "en" {
 		t.Fatalf("after saving: %v", out)
 	}
 	e.clock.set(e.clock.now().Add(time.Hour)) // hungry enough to eat again
