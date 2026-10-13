@@ -283,7 +283,8 @@ func (a *App) react(r *robot, re pet.Reaction, now time.Time) {
 		c.command("leds", leds)
 		a.say(r, "play", "", 3)
 		a.play(r, "tada", false)
-		// a little dance: look left, right, back to where the head was
+		// a little dance: look to the robot's right (a negative yaw), then to its left, then back to
+		// where the head was
 		a.rememberHead(r)
 		c.command("look", map[string]any{"yaw": -25, "pitch": 15})
 		a.later(r, 700*time.Millisecond, func() { c.command("look", map[string]any{"yaw": 25, "pitch": 15}) })
