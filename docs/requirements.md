@@ -94,6 +94,13 @@ there, instead of flipping the behaviour back and forth.
   80% of its value.
 - **F5** Asleep, a card is not eaten: the pet dreams of that food. From the 2nd
   card in the same sleep on, each card adds +15% energy (helps it sleep).
+- **F6** The parent page lists the cards by when the robot last read each one
+  (kept, W1; also during a game), the most recent first, with the time since
+  ("just now", "3 min ago", "2 h ago", "yesterday", "4 days ago", "never"),
+  updated live; cards never read come last, by food in the menu's order. A
+  card read in the last 5 minutes blinks gently (a steady highlight with
+  reduced motion), and a read while the cards are on the screen brings its
+  row into view: the parent holding a card sees which row it is.
 
 ### Screen
 
@@ -248,7 +255,7 @@ For showing the pet: something always happens within a minute.
 - **A3** Settings: name, language, difficulty; schedule (D1) and school; daily
   play limit; sounds, voice, volume (40); night light, screen off at night,
   night wake minutes; drawn faces; demo mode; game ball seconds and head moves;
-  photos for the color game's leaderboard; food per card.
+  photos for the color game's leaderboard; food per card (F6).
 - **A4** Set the needs directly (sliders, all full).
 - **A5** A log of what happened; previews of morning, bedtime, the needs
   picture, every sound and spoken line on the robot.

@@ -6,9 +6,9 @@
 <title>Pet · for parents</title>
 <link rel="icon" href="/chan/happy.svg">
 <style>
-  :root { --bg: #f6f4ef; --card: #fff; --ink: #2d2a26; --muted: #736d64; --line: #e6e0d6; --accent: #376cc5; /* 4.5:1 or more */ --danger: #c62828; --ok: #2e7d32; }
+  :root { --bg: #f6f4ef; --card: #fff; --ink: #2d2a26; --muted: #736d64; --line: #e6e0d6; --accent: #376cc5; /* 4.5:1 or more */ --danger: #c62828; --ok: #2e7d32; --seen: #ffe49a; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #17181b; --card: #222428; --ink: #ecebe8; --muted: #a09c95; --line: #34363b; --accent: #7aa7ff; --danger: #ff6b6b; --ok: #7bd389; }
+    :root { --bg: #17181b; --card: #222428; --ink: #ecebe8; --muted: #a09c95; --line: #34363b; --accent: #7aa7ff; --danger: #ff6b6b; --ok: #7bd389; --seen: #5c4a14; }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 system-ui, sans-serif; padding: 16px; }
@@ -53,6 +53,22 @@
   .log { max-height: 320px; overflow: auto; }
   .tries { display: flex; flex-wrap: wrap; gap: 8px; }
   .hidden { display: none !important; }
+  /* Food cards (F6): one row per card, the most recently read first; on a phone the time since
+     the last read goes under the uid. A card read in the last minutes blinks gently. */
+  .cards .card { display: grid; grid-template-columns: 22px minmax(0, 1fr) 7.5em auto auto; grid-template-areas: "img uid ago food rm";
+    gap: 2px 10px; align-items: center; padding: 6px; border-top: 1px solid var(--line); font-size: 14px; }
+  .cards .card img { grid-area: img; width: 22px; }
+  .cards .uid { grid-area: uid; overflow-wrap: anywhere; }
+  .cards .ago { grid-area: ago; color: var(--muted); white-space: nowrap; }
+  .cards .card select { grid-area: food; }
+  .cards .card button { grid-area: rm; }
+  .cards .card.recent { animation: seen 1.2s ease-in-out infinite alternate; }
+  .cards .card.recent .ago { color: var(--ink); font-weight: 600; }
+  @keyframes seen { from { background: transparent; } to { background: var(--seen); } }
+  @media (prefers-reduced-motion: reduce) { .cards .card.recent { animation: none; background: var(--seen); } }
+  @media (max-width: 520px) {
+    .cards .card { grid-template-columns: 22px minmax(0, 1fr) auto; grid-template-areas: "img uid food" "img ago rm"; }
+  }
   .save-bar { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0; display: flex; gap: 12px; align-items: center; }
 </style>
 </head>
@@ -161,7 +177,7 @@
     <section>
       <h2 data-t="cards"></h2>
       <p class="hint" data-t="cardsHint"></p>
-      <table id="cards"></table>
+      <div id="cards" class="cards"></div>
     </section>
 
     <div class="save-bar">
@@ -242,8 +258,9 @@ const T = {
     limits: "Omezení", playLimit: "Hraní denně", minutes: "Minut za den, 0 = bez omezení.",
     playLimitHint: "Po vyčerpání je mazlíček unavený a chce si odpočinout do zítřka. Krmit jde vždy.",
     robot: "Robot", sounds: "Zvuky", volume: "Hlasitost", nightLight: "Noční světýlko (tlumené LED)", screenOff: "V noci vypnout obrazovku", screenIdle: "Přes den vypnout obrazovku, když si nikdo nehraje (minuty, 0 = nikdy)",
-    cards: "Kartičky s jídlem (NFC)", cardsHint: "Přilož kartičku k robotovi – objeví se tady a můžeš jí vybrat jídlo. Neznámá kartička dá jablko.",
+    cards: "Kartičky s jídlem (NFC)", cardsHint: "Přilož kartičku k robotovi – objeví se tady a můžeš jí vybrat jídlo. Neznámá kartička dá jablko. Nahoře je kartička, kterou robot přečetl naposledy; přečtená v posledních 5 minutách bliká.",
     noCards: "Zatím žádné kartičky.", unknown: "nová", remove: "Odebrat",
+    justNow: "právě teď", minAgo: n => `před ${n} min`, hAgo: n => `před ${n} h`, yesterday: "včera", daysAgo: n => `před ${n} dny`, never: "nikdy",
     save: "Uložit", saved: "Uloženo ✓",
     try: "Vyzkoušet", tryHint: "Ukáže to na robotovi hned, bez čekání na večer.",
     morning: "Ráno", night: "Dobrou noc", needs: "Potřeby na displeji", sound: "Zvuk",
@@ -293,8 +310,9 @@ const T = {
     limits: "Limits", playLimit: "Play per day", minutes: "Minutes per day, 0 = no limit.",
     playLimitHint: "When it is used up, the pet is tired and rests until tomorrow. Feeding always works.",
     robot: "Robot", sounds: "Sounds", volume: "Volume", nightLight: "Night light (dim LEDs)", screenOff: "Screen off at night", screenIdle: "By day, screen off when nobody plays (minutes, 0 = never)",
-    cards: "Food cards (NFC)", cardsHint: "Hold a card to the robot – it shows up here and you can pick its food. An unknown card feeds an apple.",
+    cards: "Food cards (NFC)", cardsHint: "Hold a card to the robot – it shows up here and you can pick its food. An unknown card feeds an apple. The card the robot read last is at the top; one read in the last 5 minutes blinks.",
     noCards: "No cards yet.", unknown: "new", remove: "Remove",
+    justNow: "just now", minAgo: n => `${n} min ago`, hAgo: n => `${n} h ago`, yesterday: "yesterday", daysAgo: n => `${n} days ago`, never: "never",
     save: "Save", saved: "Saved ✓",
     try: "Try it", tryHint: "Shows it on the robot now, without waiting for the evening.",
     morning: "Morning", night: "Good night", needs: "Needs on the screen", sound: "Sound",
@@ -318,6 +336,10 @@ const $ = id => document.getElementById(id);
 const browserLang = () => /^(cs|sk)\b/i.test(navigator.language || "") ? "cs" : "en";
 const pickedLang = () => { try { return localStorage.getItem("petLang"); } catch (e) { return null; } };
 let lang = pickedLang() || browserLang(), data = null, cardFoods = {};
+// The food cards as the server sorted them (the most recently read first), the rows removed but
+// not saved yet, and the server's clock: "3 min ago" counts on it, a phone's wrong clock does not matter.
+// cardsStale: a newer order waits until the parent has picked a food (showCards).
+let cards = [], removedCards = new Set(), clockSkew = 0, recentMs = 5 * 60 * 1000, cardsStale = false;
 
 const t = k => T[lang][k] ?? T.cs[k] ?? k;
 function texts() {
@@ -395,9 +417,10 @@ function fill(d) {
   $("playLimit").value = s.play_limit_min;
   $("sounds").checked = s.sounds; $("volume").value = s.volume; $("volumeN").textContent = s.volume;
   $("nightLight").checked = s.night_light; $("screenOff").checked = s.screen_off_at_night; $("screenIdle").value = s.screen_idle_min;
-  cardFoods = { ...s.foods };
-  for (const tag of d.unknown_tags || []) if (!(tag.uid in cardFoods)) cardFoods[tag.uid] = "";
-  renderCards(d.unknown_tags);
+  cardFoods = {};
+  removedCards.clear();
+  setCards(d);
+  renderCards();
   renderToday(d);
   renderLog(d.log);
   renderTries();
@@ -414,30 +437,97 @@ function renderToday(d) {
     + (d.head ? " " + t("head")(Math.round(d.head.pitch), Math.round(d.head.yaw)) : "");
 }
 
-function renderCards(unknown) {
-  const tbl = $("cards");
-  tbl.innerHTML = "";
-  const seen = Object.fromEntries(unknown.map(u => [u.uid, u.seen]));
-  const uids = Object.keys(cardFoods);
-  if (!uids.length) { tbl.innerHTML = `<tr><td class="hint">${t("noCards")}</td></tr>`; return; }
-  for (const uid of uids) {
-    const tr = document.createElement("tr");
+// setCards takes the cards from /api/parent; food choices not saved yet stay.
+function setCards(d) {
+  clockSkew = Date.parse(d.now) - Date.now();
+  recentMs = (d.card_recent_s || 300) * 1000;
+  cards = (d.cards || []).filter(c => !removedCards.has(c.uid));
+  for (const c of cards) if (!(c.uid in cardFoods)) cardFoods[c.uid] = c.food;
+}
+
+function renderCards() {
+  const box = $("cards");
+  box.textContent = "";
+  box.dataset.order = cards.map(c => c.uid).join(" ");
+  cardsStale = false;
+  if (!cards.length) { box.innerHTML = `<p class="hint">${t("noCards")}</p>`; return; }
+  for (const c of cards) {
+    const uid = c.uid;
+    const row = document.createElement("div");
+    row.className = "card";
+    row.dataset.uid = uid;
     const sel = document.createElement("select");
     sel.innerHTML = `<option value="">–</option>` + FOODS.map(f => `<option value="${f}">${T[lang].foods[f]}</option>`).join("");
     sel.value = cardFoods[uid];
     const img = document.createElement("img");
+    img.alt = "";
     const setImg = () => { img.src = cardFoods[uid] ? `/emoji/${cardFoods[uid]}.svg` : "/emoji/apple.svg"; img.style.opacity = cardFoods[uid] ? 1 : .3; };
     sel.onchange = () => { cardFoods[uid] = sel.value; setImg(); };
     setImg();
     const rm = document.createElement("button");
     rm.textContent = t("remove");
-    rm.onclick = () => { delete cardFoods[uid]; tr.remove(); };
-    const c1 = document.createElement("td"); c1.appendChild(img);
-    const c2 = document.createElement("td"); c2.className = "mono"; c2.textContent = uid + (seen[uid] && !data.settings.foods[uid] ? ` (${t("unknown")})` : "");
-    const c3 = document.createElement("td"); c3.appendChild(sel);
-    const c4 = document.createElement("td"); c4.appendChild(rm);
-    tr.append(c1, c2, c3, c4);
-    tbl.appendChild(tr);
+    rm.onclick = () => { delete cardFoods[uid]; removedCards.add(uid); row.remove(); };
+    const name = document.createElement("span");
+    name.className = "uid mono";
+    name.textContent = uid + (c.food ? "" : ` (${t("unknown")})`);
+    const since = document.createElement("span"); // the time since the last read (tickCards)
+    since.className = "ago";
+    row.append(img, name, since, sel, rm);
+    box.appendChild(row);
+  }
+  tickCards();
+}
+
+// ago is the time since a read: "just now", "3 min ago", "2 h ago", "yesterday", "4 days ago".
+function ago(seen, now) {
+  if (!seen) return t("never");
+  const min = Math.max(0, Math.floor((now - seen) / 60000));
+  if (min < 1) return t("justNow");
+  if (min < 60) return t("minAgo")(min);
+  if (min < 24 * 60) return t("hAgo")(Math.floor(min / 60));
+  const days = Math.floor(min / (24 * 60));
+  return days === 1 ? t("yesterday") : t("daysAgo")(days);
+}
+
+// tickCards keeps the time since each read, and the blinking, up to date while the page is open.
+function tickCards() {
+  const now = Date.now() + clockSkew, byUid = new Map(cards.map(c => [c.uid, c]));
+  const fmt = new Intl.DateTimeFormat(lang, { dateStyle: "medium", timeStyle: "short" });
+  for (const row of $("cards").querySelectorAll(".card")) {
+    const c = byUid.get(row.dataset.uid);
+    if (!c) continue;
+    const seen = c.seen ? Date.parse(c.seen) : 0, el = row.querySelector(".ago");
+    el.textContent = ago(seen, now);
+    el.title = seen ? fmt.format(seen) : "";
+    row.classList.toggle("recent", !!c.recent && now < seen + recentMs);
+  }
+}
+setInterval(tickCards, 5000);
+
+// showCards shows the cards after a refresh. The rows are made again only when the order
+// changed, and not while the parent picks a food (an open list would close): then once the
+// cards lose the focus. read: the robot just read a card, its row comes into view.
+function showCards(read) {
+  const box = $("cards");
+  if (box.dataset.order !== cards.map(c => c.uid).join(" ")) {
+    if (box.contains(document.activeElement)) cardsStale = true;
+    else renderCards();
+  }
+  tickCards();
+  if (read && !cardsStale) cardIntoView();
+}
+$("cards").addEventListener("focusout", () => setTimeout(() => {
+  if (cardsStale && !$("cards").contains(document.activeElement)) renderCards();
+}));
+
+// cardIntoView scrolls to the card just read (the blinking row at the top) when the parent
+// looks at the cards; with the cards off the screen (another setting) the page stays.
+function cardIntoView() {
+  const row = $("cards").querySelector(".card.recent"), section = $("cards").closest("section").getBoundingClientRect();
+  if (!row || section.bottom < 0 || section.top > innerHeight) return;
+  const r = row.getBoundingClientRect(), bottom = innerHeight - document.querySelector(".save-bar").offsetHeight;
+  if (r.top < 0 || r.bottom > bottom) {
+    row.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
 }
 
@@ -555,15 +645,20 @@ function liveState() {
     data.state = JSON.parse(e.data);
     renderToday(data);
   });
+  let cardTimer = 0; // the robot read a card: the cards again (a few reads in a row: once)
+  events.addEventListener("card", () => { clearTimeout(cardTimer); cardTimer = setTimeout(() => refresh(true), 300); });
 }
 setInterval(liveState, 1000);
 
-setInterval(async () => { // keep "today" and the log fresh while the page is open
+// refresh keeps "today", the log and the cards fresh while the page is open (every 30 s, and
+// when the robot reads a card: read).
+async function refresh(read) {
   if (!data?.unlocked) return;
   const { status, out } = await api("/api/parent");
-  if (status === 200 && out.unlocked) { data = out; renderToday(out); renderLog(out.log); }
+  if (status === 200 && out.unlocked) { data = out; renderToday(out); renderLog(out.log); setCards(out); showCards(read); }
   else if (status === 200) load();
-}, 30000);
+}
+setInterval(() => refresh(false), 30000);
 </script>
 </body>
 </html>

@@ -106,7 +106,8 @@ Settings ([A1–A8](docs/requirements.md#parent-page)):
 - sounds, voice and volume, night light, screen off at night, night wake minutes; by day the
   screen goes off when nobody plays (5 minutes by default, 0 = never) and a touch or play from
   a phone lights it again
-- food cards: tags seen by the robot, each assigned a food
+- food cards: tags seen by the robot, each assigned a food; the card read last is on top, with
+  the time since each read, and a card read in the last 5 minutes blinks
 - the needs themselves: sliders for food, fun and energy, or all full
 - the games: seconds per ball, whether the head moves; photos for the color
   game's leaderboard, which the page lists (remove a place, clear it)
