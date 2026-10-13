@@ -350,6 +350,10 @@ func (a *App) robotEvent(id string, ev wire.RobotEventBody) {
 	now := a.now()
 	p := r.pet
 	r.lastSeen = now
+	if ev.Name == "nfc_tag" { // noted for the parent page also when a game takes the event
+		uid, _ := ev.Data["uid"].(string)
+		a.cardRead(r, uid, now)
+	}
 	if a.gameEvent(r, ev, now) {
 		return
 	}
@@ -412,11 +416,7 @@ func (a *App) robotEvent(id string, ev wire.RobotEventBody) {
 		uid, _ := ev.Data["uid"].(string)
 		food, ok := p.Settings.Foods[uid]
 		if !ok {
-			food = "apple" // works right away; the parent can pick the food later
-			if uid != "" {
-				r.unknownTags[uid] = now
-				trimTags(r.unknownTags)
-			}
+			food = "apple" // works right away; the parent can pick the food later (cardRead)
 		}
 		if asleep { // asleep the pet dreams of the food; more cards help it sleep
 			re = p.DreamFood(now, food)

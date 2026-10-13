@@ -522,6 +522,7 @@ func (a *App) handleSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	oldLang := rb.pet.Settings.Lang
 	rb.pet.Settings = s
+	rb.pruneCards() // a card removed takes its last read along
 	if s.Lang != oldLang {
 		go a.warmVoice(context.Background()) // the new language's lines
 	}

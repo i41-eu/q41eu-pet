@@ -261,8 +261,9 @@ For showing the pet: something always happens within a minute.
 ## Reliability
 
 - **W1** The pet's state (pets, PINs, pairings, parent devices, the color
-  game's leaderboard and its photos) is kept on the server and survives
-  restarts of the server (saved every minute and on exit) and of the robot.
+  game's leaderboard and its photos, when the robot last read each food card)
+  is kept on the server and survives restarts of the server (saved every
+  minute and on exit) and of the robot.
 - **W2** A robot that reconnects gets its face and files back in step.
 - **W3** A watchdog (every 2 s) repairs what the engine would otherwise only
   fix on the next change, and logs each repair: a menu left open, a game that

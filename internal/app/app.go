@@ -90,6 +90,7 @@ type robot struct {
 	pinHash     string               // "salt:sha256hex" of the parent PIN, "" = not set yet
 	owner       string               // the owner's account key, from the manager; "" = the shared token
 	unknownTags map[string]time.Time // NFC tags without a chosen food: uid -> last seen
+	cardSeen    map[string]time.Time // every food card's last read, chosen food or not: uid -> when (cards.go)
 
 	conn     *robotConn // nil while offline
 	lastSeen time.Time
@@ -219,7 +220,7 @@ func (a *App) Handler() http.Handler {
 func (a *App) robotFor(id string) *robot {
 	r := a.robots[id]
 	if r == nil {
-		r = &robot{id: id, pet: pet.New(a.now(), pet.DefaultSettings()), unknownTags: map[string]time.Time{}}
+		r = &robot{id: id, pet: pet.New(a.now(), pet.DefaultSettings()), unknownTags: map[string]time.Time{}, cardSeen: map[string]time.Time{}}
 		a.robots[id] = r
 		a.dirty = true
 	}
@@ -356,6 +357,7 @@ type savedRobot struct {
 	PINHash     string               `json:"pin_hash,omitempty"`
 	Owner       string               `json:"owner,omitempty"`
 	UnknownTags map[string]time.Time `json:"unknown_tags,omitempty"`
+	CardSeen    map[string]time.Time `json:"card_seen,omitempty"` // added later: states without it have the unknown tags' reads only
 }
 
 func (a *App) load() error {
@@ -378,7 +380,17 @@ func (a *App) load() error {
 		if sr.UnknownTags == nil {
 			sr.UnknownTags = map[string]time.Time{}
 		}
-		a.robots[id] = &robot{id: id, pet: sr.Pet, pinHash: sr.PINHash, owner: sr.Owner, unknownTags: sr.UnknownTags}
+		if sr.CardSeen == nil {
+			sr.CardSeen = map[string]time.Time{}
+		}
+		for uid, seen := range sr.UnknownTags { // a state from before card_seen: the unknown cards' reads
+			if seen.After(sr.CardSeen[uid]) {
+				sr.CardSeen[uid] = seen
+			}
+		}
+		r := &robot{id: id, pet: sr.Pet, pinHash: sr.PINHash, owner: sr.Owner, unknownTags: sr.UnknownTags, cardSeen: sr.CardSeen}
+		r.pruneCards()
+		a.robots[id] = r
 	}
 	for sid, ids := range st.Sessions {
 		if validSessionID(sid) {
@@ -418,7 +430,7 @@ func (a *App) Save() error {
 	a.expirePairings()
 	for id, r := range a.robots {
 		r.pet.Advance(a.now())
-		st.Robots[id] = savedRobot{Pet: r.pet, PINHash: r.pinHash, Owner: r.owner, UnknownTags: r.unknownTags}
+		st.Robots[id] = savedRobot{Pet: r.pet, PINHash: r.pinHash, Owner: r.owner, UnknownTags: r.unknownTags, CardSeen: r.cardSeen}
 	}
 	for sid, s := range a.sessions {
 		if s.account != nil {
