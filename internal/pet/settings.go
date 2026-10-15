@@ -41,7 +41,11 @@ type Settings struct {
 
 	GameBallSeconds int  `json:"game_ball_seconds"` // time to catch one ball (3..10)
 	GameHeadMoves   bool `json:"game_head_moves"`   // the head circles, wanders and dodges in the game
-	ColorPhotos     bool `json:"color_photos"`      // the color game's top three get a photo from the robot's camera
+	// PhotoPlace: where leaderboard photos of the kids are kept. Only "robot" (the default,
+	// also for "") is selectable: the server takes and keeps none. "server" exists for tests
+	// and for stored data only; Normalize never lets the parent page set it. Other places
+	// (a limit in days, the parent's device) may come later, as parent settings.
+	PhotoPlace string `json:"photo_place"`
 
 	Foods map[string]string `json:"foods"` // NFC tag uid -> food key; unknown tags feed an apple
 }
@@ -79,15 +83,19 @@ func DefaultSettings() Settings {
 		NightWakeMin:     5,
 		GameBallSeconds:  5,
 		GameHeadMoves:    true,
-		ColorPhotos:      true,
+		PhotoPlace:       PhotoOnRobot,
 		DrawnFace:        true, // the Fluent Emoji faces, not the robot's own
 		Foods:            map[string]string{},
 	}
 }
 
+// PhotoOnRobot: the kids' photos stay on the robot; the server keeps none.
+const PhotoOnRobot = "robot"
+
 // Normalize fills in defaults and clamps values; the parent page sends whole settings.
 func (s *Settings) Normalize() {
 	d := DefaultSettings()
+	s.PhotoPlace = PhotoOnRobot // the only place the parent page may choose (see PhotoPlace)
 	s.Name = strings.TrimSpace(s.Name)
 	if s.Name == "" {
 		s.Name = d.Name

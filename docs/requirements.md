@@ -106,7 +106,7 @@ there, instead of flipping the behaviour back and forth.
 - **M3** Menus are still pictures (sprites) the robot reports taps on:
   - main: food, play, nap, needs (a 2×2 grid);
   - food: the six foods;
-  - play: catch the ball, the color game;
+  - play: catch the ball, the color game, the leaderboard (a podium picture);
   - needs: the needs picture with all three bars.
 - **M4** Every menu screen has the same back arrow at the bottom center, and
   no other close control. Back goes to the menu it came from; on the main menu
@@ -198,14 +198,16 @@ there, instead of flipping the behaviour back and forth.
 - **G7** During a game the screen has a fixed brightness (70%): the kid's hand
   near the light sensor must not dim it. Auto brightness returns after the game.
 - **G8** The color game's leaderboard: the three best full games (every round
-  done), kept on the server (the state file, photos next to it), so a robot
-  restart loses nothing. A game fast enough for it: the robot says the place
-  ("Jsi na prvním místě! Usměj se, vyfotím tě."), counts down ("Tři, dva,
-  jedna, sýr!") and takes a photo with its camera (parent setting, on by
-  default). After every color game the robot shows the podium (first in the
-  middle, photos in gold, silver and bronze frames, the times); the kid's page
-  shows it too. The parent page lists it, removes a place or clears it (the
-  photos go too). Photos are served only to browsers paired with the robot.
+  done), kept on the server (the state file), so a robot restart loses nothing.
+  After every color game the robot shows the podium (first in the middle, the
+  times); the kid's page shows it too, and the robot's menu does: Play → the
+  podium tile. **No photos of the kids on the server** (2026-10-15, the owner):
+  the robot takes none for the board by default; photos belong on the robot only
+  (the robot keeping them is not built yet), and later options (a limit in days,
+  the parent's device) may come as parent settings (`photo_place`, only "robot"
+  today). Photos taken before that stay until the owner decides; they are served
+  only to browsers paired with the robot. The parent page lists the board,
+  removes a place or clears it (a place's photo goes too).
 
 ## Naps
 
@@ -248,15 +250,15 @@ For showing the pet: something always happens within a minute.
 - **A3** Settings: name, language, difficulty; schedule (D1) and school; daily
   play limit; sounds, voice, volume (40); night light, screen off at night,
   night wake minutes; drawn faces; demo mode; game ball seconds and head moves;
-  photos for the color game's leaderboard; food per card.
+  food per card.
 - **A4** Set the needs directly (sliders, all full).
 - **A5** A log of what happened; previews of morning, bedtime, the needs
   picture, every sound and spoken line on the robot.
 - **A6** New pet (needs and age reset, settings kept), change the PIN.
 - **A7** Demo mode has its own section at the bottom of the page (on/off,
   ignore school); its checkboxes save at once.
-- **A8** The color game's leaderboard with photos: remove a place, or clear it
-  (the photos go too).
+- **A8** The color game's leaderboard: remove a place, or clear it (older
+  photos go too).
 
 ## Reliability
 

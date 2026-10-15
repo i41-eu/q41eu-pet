@@ -28,9 +28,12 @@ const (
 	boardShow = 8 * time.Second  // the podium on the robot
 )
 
-// canPhoto: photos are kept, the parent allows them, the robot has a camera.
+// canPhoto: the kid's photo for the board is taken and kept on the server only when the
+// settings say "server" (never by default, and not selectable on the parent page: the
+// photos stay on the robot, see pet.Settings.PhotoPlace), there is somewhere to keep
+// it, and the robot has a camera.
 func (a *App) canPhoto(r *robot) bool {
-	return a.photos() && r.pet.Settings.ColorPhotos && slices.Contains(r.commands, "snapshot")
+	return r.pet.Settings.PhotoPlace == "server" && a.photos() && slices.Contains(r.commands, "snapshot")
 }
 
 // boardAfterGame runs after the color game's time is said: the photo for a new place,

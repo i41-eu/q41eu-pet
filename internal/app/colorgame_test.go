@@ -1,6 +1,7 @@
 package app
 
 import (
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/i41-eu/q41eu-pet/internal/pet"
 	"github.com/i41-eu/q41eu-pet/internal/robotpic"
 	"github.com/i41-eu/q41eu-raw/statestore"
 	"github.com/i41-eu/q41eu-raw/wire"
@@ -117,6 +119,7 @@ func TestLeaderboardPhoto(t *testing.T) {
 	r := e.connectRobotWith("robot-1", []string{"sprite", "assets", "snapshot"})
 	kid, stranger := e.browser(), e.browser()
 	kid.pair(r)
+	e.robotState("robot-1", func(rb *robot) { rb.pet.Settings.PhotoPlace = "server" }) // not the default: see TestNoPhotosByDefault
 	playColors(t, e, r)
 	r.command("snapshot")           // first place: "smile", three, two, one
 	photo := robotpic.Food("apple") // any JPEG
@@ -134,4 +137,43 @@ func TestLeaderboardPhoto(t *testing.T) {
 	if res, _ := stranger.c.Get(e.srv.URL + url); res.StatusCode != 404 {
 		t.Fatalf("a stranger got the photo: %d", res.StatusCode)
 	}
+}
+
+// By default the server takes and keeps no photo of the kid, and the robot's menu
+// shows the leaderboard.
+func TestNoPhotosByDefault(t *testing.T) {
+	e := newEnv(t, "")
+	e.fastGame(300 * time.Millisecond)
+	dir := t.TempDir()
+	e.app.cfg.State = &statestore.File{Path: filepath.Join(dir, "state.json"), BlobDir: filepath.Join(dir, "photos")}
+	r := e.connectRobotWith("robot-1", []string{"sprite", "assets", "snapshot"})
+	playColors(t, e, r) // first place: no "snapshot" command, the podium alone
+	r.binary(wire.BinShowJPEG)
+	if ents, _ := os.ReadDir(filepath.Join(dir, "photos")); len(ents) != 0 {
+		t.Fatalf("photos on the server: %v", ents)
+	}
+	s := pet.DefaultSettings()
+	s.PhotoPlace = "server"
+	s.Normalize()
+	if s.PhotoPlace != pet.PhotoOnRobot {
+		t.Fatalf("the parent page set the photo place: %q", s.PhotoPlace)
+	}
+}
+
+// The play menu's board tile shows the podium.
+func TestMenuBoardTile(t *testing.T) {
+	e := newEnv(t, "")
+	r := e.connectRobotWith("robot-1", []string{"sprite", "assets"})
+	files := []string{"pet/menu-bg.png"}
+	for _, items := range menus {
+		for _, m := range items {
+			files = append(files, "pet/"+m.asset)
+		}
+	}
+	haveFiles(t, r, files...)
+	r.event("screen_tap", map[string]any{"x": 160, "y": 120})
+	r.event("screen_tap", map[string]any{"x": 208, "y": 50, "sprite": "m:open:play"})
+	time.Sleep(50 * time.Millisecond)
+	r.event("screen_tap", map[string]any{"x": 264, "y": 100, "sprite": "m:play:board"})
+	r.binary(wire.BinShowJPEG)
 }
