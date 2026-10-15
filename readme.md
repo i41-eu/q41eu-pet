@@ -74,7 +74,7 @@ game's podium. Actions from the robot show on the page too.
 head makes each one harder, up to dodging a hand that comes close
 ([G1–G3](docs/requirements.md#play)). **The color game:** the LED strips show colors, the kid
 presses them in each level's order on the screen; the three best games make a
-leaderboard with photos from the robot's camera ([G6–G8](docs/requirements.md#play)).
+leaderboard (shown in the robot's Play menu; no photos of the kids on the server) ([G6–G8](docs/requirements.md#play)).
 
 The head never moves while the robot is in someone's hands (the accelerometer
 and gyro in its telemetry tell). It sinks at rest (the firmware lets the servos
@@ -109,7 +109,7 @@ Settings ([A1–A8](docs/requirements.md#parent-page)):
 - food cards: tags seen by the robot, each assigned a food; the card read last is on top, with
   the time since each read, and a card read in the last 5 minutes blinks
 - the needs themselves: sliders for food, fun and energy, or all full
-- the games: seconds per ball, whether the head moves; photos for the color
+- the games: seconds per ball, whether the head moves; the color
   game's leaderboard, which the page lists (remove a place, clear it)
 - faces on the robot (on by default): Fluent Emoji faces filling the whole screen, one per
   mood (`internal/robotpic/faces/`, made by `genfaces`); off: the robot's own blinking face
@@ -135,7 +135,7 @@ go run ./cmd/q41eu-pet -tz Europe/Prague
 | `-listen` | `:8770` | robots and browsers |
 | `-public-url` | `http://<LAN IP>:8770` | base of the QR link |
 | `-token-file` | `~/.config/stackchan-server/robot-token` | robot bearer token, generated if missing |
-| `-state-file` | `~/.local/state/stackchan-pet/state.json` | pets, PINs, pairings, the leaderboard; its photos go to `photos/` next to it; `""` = memory only (no photos) |
+| `-state-file` | `~/.local/state/stackchan-pet/state.json` | pets, PINs, pairings, the leaderboard; older leaderboard photos are in `photos/` next to it (no new ones are taken); `""` = memory only (no photos) |
 | `-state-database` | `$STATE_DATABASE_URL` | Postgres instead (`postgres://user@host/db`, the password from `PGPASSWORD`): the same document and the photos, with the last 50 saves (q41eu-raw's `statestore`); a `-state-file` that exists, and its photos, are imported once into an empty database; it holds a lock while running and stops if the connection is lost |
 | `-tz` | this machine's | the family's time zone for the schedule |
 | `-voice-dir` | `~/.cache/stackchan-pet/voice` | where the spoken lines are kept |

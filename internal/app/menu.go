@@ -42,8 +42,9 @@ var menus = map[string][]menuItem{
 		{"back", "menu-back.png", 160, 206},
 	},
 	"play": {
-		{"play:catch", "menu-catch.png", 100, 100},
-		{"play:colors", "menu-colors.png", 220, 100},
+		{"play:catch", "menu-catch.png", 56, 100},
+		{"play:colors", "menu-colors.png", 160, 100},
+		{"play:board", "menu-board.png", 264, 100},
 		{"back", "menu-back.png", 160, 206},
 	},
 }
@@ -122,6 +123,12 @@ func (a *App) menuTap(r *robot, sprite string, now time.Time) {
 		return
 	}
 	a.closeMenu(r)
+	if action == "play:board" { // the color game's leaderboard, a picture for a few seconds
+		if r.conn != nil {
+			a.showBoard(r)
+		}
+		return
+	}
 	p := r.pet
 	var re pet.Reaction
 	switch {

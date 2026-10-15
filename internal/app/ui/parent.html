@@ -156,7 +156,6 @@
       <div class="row"><label><input id="headMoves" type="checkbox"> <span data-t="headMoves"></span></label></div>
       <p class="hint" data-t="gameHint"></p>
       <h2 style="margin-top:14px" data-t="colorsTitle"></h2>
-      <div class="row"><label><input id="colorPhotos" type="checkbox"> <span data-t="colorPhotos"></span></label></div>
       <p class="hint" data-t="colorPhotosHint"></p>
       <table id="top"></table>
       <div class="row"><button class="danger" id="topClear" data-t="topClear"></button></div>
@@ -248,8 +247,8 @@ const T = {
     setNeeds: "Změnit potřeby", set: "Nastavit", allFull: "Vše plné",
     game: "Hra (chytání míčku)", ballSeconds: "Sekund na míček", headMoves: "Hlava se při hře hýbe (krouží, uhýbá ruce)",
     gameHint: "Pro menší děti: víc sekund a hlava v klidu.",
-    colorsTitle: "Hra s barvami – žebříček", colorPhotos: "Fotit hráče na prvních třech místech",
-    colorPhotosHint: "Robot hráče vyfotí svou kamerou. Fotky zůstávají jen na tomto serveru a ukazují se na robotovi a na stránkách mazlíčka.",
+    colorsTitle: "Hra s barvami – žebříček",
+    colorPhotosHint: "Server fotky dětí neukládá. Žebříček se ukazuje v nabídce robota (Hrát).",
     topClear: "Smazat žebříček", topClearConfirm: "Smazat celý žebříček i s fotkami?",
     drawnFace: "Kreslený obličej na robotovi", drawnFaceHint: "Místo robotova vlastního (mrkajícího) obličeje ukazuje barevné obrázky podle nálady.",
     nightWake: "Vzbudit v noci",
@@ -300,8 +299,8 @@ const T = {
     setNeeds: "Change the needs", set: "Set", allFull: "All full",
     game: "Game (catch the ball)", ballSeconds: "Seconds per ball", headMoves: "The head moves in the game (circles, dodges a hand)",
     gameHint: "For small kids: more seconds and a still head.",
-    colorsTitle: "Color game – leaderboard", colorPhotos: "Take a photo of the top three players",
-    colorPhotosHint: "The robot takes the photo with its camera. Photos stay on this server only and show on the robot and the pet's pages.",
+    colorsTitle: "Color game – leaderboard",
+    colorPhotosHint: "The server keeps no photos of the kids. The leaderboard shows in the robot's menu (Play).",
     topClear: "Clear the leaderboard", topClearConfirm: "Clear the whole leaderboard, photos too?",
     drawnFace: "Drawn face on the robot", drawnFaceHint: "Colourful pictures per mood instead of the robot's own (blinking) face.",
     nightWake: "Wake at night",
@@ -403,7 +402,6 @@ function fill(d) {
   $("weWake").value = s.weekend.wake; $("weBed").value = s.weekend.bed;
   $("nightWake").value = s.night_wake_min;
   $("ballSeconds").value = s.game_ball_seconds; $("headMoves").checked = s.game_head_moves;
-  $("colorPhotos").checked = s.color_photos;
   renderTop(st.top || []);
   $("drawnFace").checked = s.drawn_face;
   $("voice").checked = s.voice;
@@ -582,7 +580,6 @@ function collect() {
     play_limit_min: +$("playLimit").value || 0,
     night_wake_min: +$("nightWake").value || 0,
     game_ball_seconds: +$("ballSeconds").value || 5, game_head_moves: $("headMoves").checked,
-    color_photos: $("colorPhotos").checked,
     drawn_face: $("drawnFace").checked,
     voice: $("voice").checked,
     demo: $("demo").checked,

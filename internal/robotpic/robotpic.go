@@ -303,7 +303,7 @@ const (
 	MainTile  = 84 // main menu: square
 	FoodTileW = 92 // food menu
 	FoodTileH = 76
-	PlayTileW = 96 // play menu (two tiles)
+	PlayTileW = 96 // play menu (three tiles)
 	PlayTileH = 110
 	BackTileW = 120 // the back button at the bottom
 	BackTileH = 44
@@ -318,6 +318,7 @@ func menuTilesList() []tile {
 		{"menu-back", "back", tileGrey, BackTileW, BackTileH},
 		{"menu-catch", "ball", tileGreen, PlayTileW, PlayTileH},
 		{"menu-colors", "colors", tileCream, PlayTileW, PlayTileH},
+		{"menu-board", "board", tileBlue, PlayTileW, PlayTileH},
 	}
 	for _, f := range []string{"apple", "carrot", "banana", "bread", "milk", "cake"} {
 		t = append(t, tile{"menu-food-" + f, f, tileCream, FoodTileW, FoodTileH})
@@ -335,6 +336,16 @@ func menuTile(t tile) []byte {
 	case "colors": // the color game: its six colors as dots, three by two
 		for i, name := range Colors {
 			fillCircle(img, cx+(i%3-1)*t.w*3/10, cy+(i/3*2-1)*t.h/5, t.w/8, ColorRGBA[name])
+		}
+	case "board": // the leaderboard: a podium of three bars under a star
+		bw := t.w * 2 / 10
+		for i, h := range []int{t.h * 3 / 10, t.h * 4 / 10, t.h * 2 / 10} { // second, first, third
+			x0 := cx - bw*3/2 + i*bw
+			draw.Draw(img, image.Rect(x0, t.h*8/10-h, x0+bw-1, t.h*8/10), &image.Uniform{white}, image.Point{}, draw.Over)
+		}
+		if ic := icon("star"); ic != nil {
+			s := t.w * 3 / 10
+			drawScaled(img, ic, image.Rect(cx-s/2, t.h*8/10-t.h*4/10-s-2, cx+s/2, t.h*8/10-t.h*4/10-2))
 		}
 	case "needs": // the needs picture in small: three icons with their bars
 		k := func(v int) int { return v * t.h / 96 } // drawn for 96 px
